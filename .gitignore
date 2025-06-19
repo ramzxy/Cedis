@@ -1,0 +1,16 @@
+# Ignore CMake build artifacts
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+Makefile
+cmake_install.cmake
+/out/
+# VS Code/Visual Studio clutter
+*.user
+*.VC.db
+*.VC.opendb
+.vscode/
+*.sln
+*.vcxproj*
+.vs/
+
