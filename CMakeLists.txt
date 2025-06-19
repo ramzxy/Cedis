@@ -12,6 +12,7 @@ find_package(Boost REQUIRED COMPONENTS asio)
 
 # Source files
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+include_directories(include)
 
 add_executable(Cedis ${SOURCES})
 
