@@ -96,7 +96,6 @@ int Connection::send_data(const uint8_t *data, size_t length)
 
     try
     {
-        // Use Boost ASIO to write the data to the socket
         // This will block until all data is sent
         size_t bytes_sent = boost::asio::write(
             socket_,
@@ -134,26 +133,22 @@ int Connection::receive_data(uint8_t *data, size_t max_length)
 
     try
     {
-        // Use Boost ASIO to read data from the socket
         // This will block until at least some data is available
         boost::system::error_code error;
         size_t bytes_received = socket_.read_some(
             boost::asio::buffer(data, max_length),
             error);
 
-        // Check for errors
         if (error)
         {
             if (error == boost::asio::error::eof)
             {
-                // Server closed the connection cleanly
                 std::cout << "Server closed the connection" << std::endl;
                 connected_ = false;
                 return 0;
             }
             else
             {
-                // Some other error
                 throw boost::system::system_error(error);
             }
         }
