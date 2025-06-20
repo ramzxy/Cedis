@@ -48,8 +48,7 @@ bool Connection::connect()
                   << server_ip_ << ":" << server_port_ << std::endl;
 
         std::cout << "VPN connection established successfully" << std::endl;
-        return true;
-    }
+        return true;    }
     catch (const boost::system::system_error &e)
     {
 
