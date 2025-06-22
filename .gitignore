@@ -5,6 +5,8 @@
 Makefile
 cmake_install.cmake
 /out/
+/cmake-build-debug/
+.idea/
 # VS Code/Visual Studio clutter
 *.user
 *.VC.db

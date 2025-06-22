@@ -1,34 +1,60 @@
-﻿cmake_minimum_required(VERSION 3.16)
-project(Cedis LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.20)
+project(Cedis)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)  # Helpful for IDEs
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable folders in Visual Studio for better organization
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+# Set policy for modern Boost finding
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
 
-# Optional: vcpkg integration (uncomment if using vcpkg)
-# set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+# Enable vcpkg integration if available
+if(DEFINED CMAKE_TOOLCHAIN_FILE)
+    message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+endif()
 
-# Find Boost (system is required for asio error codes)
-find_package(Boost REQUIRED COMPONENTS system)
-
-# Include Boost headers
-include_directories(${Boost_INCLUDE_DIRS})
-
-# Add include directory for your own headers (optional)
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-# Collect source files
-file(GLOB_RECURSE SOURCES
-    ${PROJECT_SOURCE_DIR}/src/*.cpp
-    ${PROJECT_SOURCE_DIR}/main.cpp
+# Find Boost using CONFIG mode (works best with vcpkg)
+find_package(Boost REQUIRED CONFIG COMPONENTS 
+    system 
+    thread
 )
 
-# Create the executable
-add_executable(Cedis ${SOURCES})
+# Add executable with correct source paths
+add_executable(${PROJECT_NAME} 
+    src/main.cpp
+    src/connection.cpp
+)
 
-# Link Boost.System (required by Asio)
-target_link_libraries(Cedis PRIVATE Boost::system)
+# Include directories - add the include folder for headers
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# Link Boost libraries using modern target-based approach
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Boost::system
+    Boost::thread
+)
+
+# Add compiler definitions for debug mode if building in debug
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG_MODE)
+endif()
+
+# For Windows, ensure proper linking and definitions
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+        _WIN32_WINNT=0x0601  # Windows 7 or later for ASIO
+        WIN32_LEAN_AND_MEAN
+        NOMINMAX
+    )
+    
+    # Link Windows socket libraries for ASIO
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        ws2_32 
+        wsock32
+    )
+endif()
