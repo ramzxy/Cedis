@@ -3,6 +3,9 @@
 #include <string>
 #include <boost/asio.hpp>
 
+using namespace boost::asio::ip;
+
+
 Connection::Connection(boost::asio::io_context &io_context,
                        const std::string &server_ip,
                        int server_port)
@@ -10,6 +13,7 @@ Connection::Connection(boost::asio::io_context &io_context,
       socket_(io_context),
       server_ip_(server_ip),
       server_port_(server_port),
+      acceptor_(io_context, tcp::endpoint(tcp::v4(), server_port)),
       connected_(false)
 
 {
@@ -29,19 +33,11 @@ Connection::~Connection()
     std::cout << "Connection object destroyed" << std::endl;
 }
 
-bool Connection::connect()
+bool Connection::start()
 {
     try
     {
-
-        boost::asio::ip::tcp::resolver resolver(io_context_);
-
-        boost::asio::ip::tcp::resolver::results_type endpoints =
-            resolver.resolve(server_ip_, std::to_string(server_port_));
-
-        std::cout << "Resolved server address, attempting connection..." << std::endl;
-
-        boost::asio::connect(socket_, endpoints);
+        acceptor_.accept(socket_);
 
         connected_ = true;
         std::cout << "TCP connection established to "
@@ -49,6 +45,7 @@ bool Connection::connect()
 
         std::cout << "VPN connection established successfully" << std::endl;
         return true;    }
+
     catch (const boost::system::system_error &e)
     {
 

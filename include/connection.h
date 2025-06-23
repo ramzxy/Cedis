@@ -43,7 +43,7 @@ public:
      * 2. Establishes a TCP connection
      * 3. Performs initial handshake
      */
-    bool connect();
+    bool start();
     
     /**
      * @brief Disconnect from the VPN server
@@ -89,6 +89,7 @@ private:
     // Boost ASIO components for networking
     boost::asio::io_context& io_context_;
     boost::asio::ip::tcp::socket socket_;
+    boost::asio::ip::tcp::acceptor acceptor_;
     
     // Server connection details
     int server_port_;
