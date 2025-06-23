@@ -72,14 +72,14 @@ public:
      * This method handles the low-level receiving of data.
      * The data will need to be decrypted after receiving.
      */
-    int receive_data(uint8_t* data, size_t max_length);
+    void receive_data();
     
     /**
      * @brief Check if the connection is active
      * @return true if connected, false otherwise
      */
     bool is_connected() const;
-    
+
     /**
      * @brief Get the server IP address
      * @return The IP address of the VPN server

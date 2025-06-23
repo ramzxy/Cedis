@@ -1,6 +1,7 @@
 #include "connection.h"
 #include <iostream>
 #include <string>
+#include <bits/regex_error.h>
 #include <boost/asio.hpp>
 
 using namespace boost::asio::ip;
@@ -119,21 +120,24 @@ int Connection::send_data(const uint8_t *data, size_t length)
     }
 }
 
-int Connection::receive_data(uint8_t *data, size_t max_length)
+void Connection::receive_data()
 {
     if (!connected_)
     {
         std::cerr << "Cannot receive data: not connected" << std::endl;
-        return -1;
     }
 
     try
     {
-        // This will block until at least some data is available
+        char buffer[1024];
         boost::system::error_code error;
-        size_t bytes_received = socket_.read_some(
-            boost::asio::buffer(data, max_length),
-            error);
+        while (buffer[0] != 'X')
+        {
+            std::memset(buffer, 0, sizeof(buffer));
+            size_t length = socket_.read_some(boost::asio::buffer(buffer, sizeof(buffer)), error);
+            std::cout << "Received " << length << " bytes from server" << std::endl;
+            std::cout << buffer << std::endl;
+        }
 
         if (error)
         {
@@ -141,7 +145,6 @@ int Connection::receive_data(uint8_t *data, size_t max_length)
             {
                 std::cout << "Server closed the connection" << std::endl;
                 connected_ = false;
-                return 0;
             }
             else
             {
@@ -149,12 +152,6 @@ int Connection::receive_data(uint8_t *data, size_t max_length)
             }
         }
 
-// For debugging in verbose mode
-#ifdef DEBUG_MODE
-        std::cout << "Received " << bytes_received << " bytes from server" << std::endl;
-#endif
-
-        return static_cast<int>(bytes_received);
     }
     catch (const boost::system::system_error &e)
     {
@@ -166,8 +163,6 @@ int Connection::receive_data(uint8_t *data, size_t max_length)
         {
             connected_ = false;
         }
-
-        return -1;
     }
 }
 

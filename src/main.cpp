@@ -23,4 +23,5 @@ int main() {
 	if (!connection->send_data(packet.data(), packet.size())) {
 		std::cerr << "packet send failed.";
 	}
+	connection->receive_data();
 }	
