@@ -25,6 +25,7 @@ find_package(Boost REQUIRED CONFIG COMPONENTS
 add_executable(${PROJECT_NAME} 
     src/main.cpp
     src/connection.cpp
+        include/Parser.h
 )
 
 # Include directories - add the include folder for headers

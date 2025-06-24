@@ -1,7 +1,6 @@
 #include "connection.h"
 #include <iostream>
 #include <string>
-#include <bits/regex_error.h>
 #include <boost/asio.hpp>
 
 using namespace boost::asio::ip;
@@ -12,9 +11,9 @@ Connection::Connection(boost::asio::io_context &io_context,
                        int server_port)
     : io_context_(io_context),
       socket_(io_context),
-      server_ip_(server_ip),
-      server_port_(server_port),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), server_port)),
+      server_port_(server_port),
+      server_ip_(server_ip),
       connected_(false)
 
 {
@@ -56,6 +55,26 @@ bool Connection::start()
     }
 }
 
+void Connection::handle_client()
+{
+    if (!connected_)
+    {
+        std::cerr << "Cannot handle client: not connected" << std::endl;
+    }
+    //TODO: add async and make sure these can run multi command.
+    try
+    {
+        while (parser_.isCommandValid())
+            parser_.addToBuffer(read());
+        auto command = parser_.parse();
+        //TODO: implement a command class
+    }
+    catch (const boost::system::system_error &e)
+    {
+        std::cerr << "Error handling client: " << e.what() << std::endl;
+    }
+}
+
 void Connection::disconnect()
 {
     if (!connected_)
@@ -83,7 +102,7 @@ void Connection::disconnect()
     }
 }
 
-int Connection::send_data(const uint8_t *data, size_t length)
+int Connection::send_response(const std::string *response)
 {
     if (!connected_)
     {
@@ -96,13 +115,11 @@ int Connection::send_data(const uint8_t *data, size_t length)
         // This will block until all data is sent
         size_t bytes_sent = boost::asio::write(
             socket_,
-            boost::asio::buffer(data, length));
-
-// For debugging in verbose mode
-#ifdef DEBUG_MODE
-        std::cout << "Sent " << bytes_sent << " bytes to server" << std::endl;
-#endif
-
+            boost::asio::buffer(*response));
+        if (bytes_sent != 0)
+        {
+            std::cout << "Sent: " << *response << std::endl;
+        }
         return static_cast<int>(bytes_sent);
     }
     catch (const boost::system::system_error &e)
@@ -120,7 +137,7 @@ int Connection::send_data(const uint8_t *data, size_t length)
     }
 }
 
-void Connection::receive_data()
+std::vector<uint8_t> Connection::read()
 {
     if (!connected_)
     {
@@ -129,14 +146,15 @@ void Connection::receive_data()
 
     try
     {
-        char buffer[1024];
+        std::vector<uint8_t> buffer(1024);
+        size_t bytes_read = 0;
         boost::system::error_code error;
-        while (buffer[0] != 'X')
+
+        bytes_read = socket_.read_some(boost::asio::buffer(buffer), error);
+
+        if (bytes_read != 0 && buffer[0] != 'X')
         {
-            std::memset(buffer, 0, sizeof(buffer));
-            size_t length = socket_.read_some(boost::asio::buffer(buffer, sizeof(buffer)), error);
-            std::cout << "Received " << length << " bytes from server" << std::endl;
-            std::cout << buffer << std::endl;
+            return buffer;
         }
 
         if (error)
