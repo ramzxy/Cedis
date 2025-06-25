@@ -20,8 +20,10 @@ int main() {
 	std::string data = "Hello";
 	std::vector<uint8_t> packet(data.begin(), data.end());
 
-	if (!connection->send_data(packet.data(), packet.size())) {
+	if (!connection->send_response(&data)) {
 		std::cerr << "packet send failed.";
 	}
-	connection->receive_data();
+	while (true) {
+		connection->read();
+	}
 }	

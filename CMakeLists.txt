@@ -15,6 +15,24 @@ if(DEFINED CMAKE_TOOLCHAIN_FILE)
     message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
+# macOS-specific setup for Homebrew Boost
+if(APPLE)
+    # Detect Homebrew installation path
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+        # Apple Silicon Macs
+        set(HOMEBREW_PREFIX "/opt/homebrew")
+    else()
+        # Intel Macs
+        set(HOMEBREW_PREFIX "/usr/local")
+    endif()
+    
+    # Add Homebrew paths to help find Boost
+    if(EXISTS "${HOMEBREW_PREFIX}")
+        list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_PREFIX}")
+        message(STATUS "Added Homebrew prefix to search path: ${HOMEBREW_PREFIX}")
+    endif()
+endif()
+
 # Find Boost using CONFIG mode (works best with vcpkg)
 find_package(Boost REQUIRED CONFIG COMPONENTS 
     system 
@@ -26,6 +44,7 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/connection.cpp
         include/Parser.h
+        src/parser.cpp
 )
 
 # Include directories - add the include folder for headers
@@ -57,5 +76,17 @@ if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         ws2_32 
         wsock32
+    )
+endif()
+
+# For macOS, ensure proper threading and system libraries
+if(APPLE)
+    # Enable pthreads for threading support
+    find_package(Threads REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+    
+    # macOS-specific compiler flags for Boost ASIO
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        _DARWIN_C_SOURCE  # Enable POSIX extensions on macOS
     )
 endif()

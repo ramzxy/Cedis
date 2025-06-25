@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
-
+#include "parser.h"
 using namespace boost::asio::ip;
 
 
@@ -154,6 +154,10 @@ std::vector<uint8_t> Connection::read()
 
         if (bytes_read != 0 && buffer[0] != 'X')
         {
+            for (uint8_t byte : buffer) {
+                if (byte == 0) break;
+                std::cout << static_cast<char>(byte);
+            }
             return buffer;
         }
 

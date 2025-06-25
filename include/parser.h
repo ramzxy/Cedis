@@ -1,9 +1,9 @@
-
+#pragma once
 #ifndef PARSER_H
 #define PARSER_H
-#include "connection.h"
+#include "vector"
 
-class Parser
+class parser
 {
     public:
     // adds received to internal buffer

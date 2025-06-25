@@ -1,5 +1,6 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
+#pragma once
 
 #include <string>
 #include <boost/asio.hpp>
@@ -40,7 +41,7 @@ private:
     bool connected_;
 
     // Parser object
-    Parser parser_;
+    parser parser_;
 };
 
 #endif // CONNECTION_H 
