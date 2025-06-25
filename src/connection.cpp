@@ -64,14 +64,68 @@ void Connection::handle_client()
     //TODO: add async and make sure these can run multi command.
     try
     {
+        std::vector<uint8_t> buffer;
         while (parser_.isCommandValid())
-            parser_.addToBuffer(read());
+            parser_.addToBuffer(buffer);
         auto command = parser_.parse();
+
         //TODO: implement a command class
     }
     catch (const boost::system::system_error &e)
     {
         std::cerr << "Error handling client: " << e.what() << std::endl;
+    }
+}
+
+size_t Connection::read(std::vector<uint8_t> &buffer)
+{
+    if (!connected_)
+    {
+        std::cerr << "Cannot receive data: not connected" << std::endl;
+    }
+
+    try
+    {
+        size_t bytes_read = 0;
+        boost::system::error_code error;
+
+        bytes_read = socket_.read_some(boost::asio::buffer(buffer), error);
+
+        buffer.resize(bytes_read);
+
+        if (bytes_read != 0 && buffer[0] != 'X')
+        {
+            for (uint8_t byte : buffer) {
+                if (byte == 0) break;
+                std::cout << static_cast<char>(byte);
+            }
+            return bytes_read;
+        }
+
+        if (error)
+        {
+            if (error == boost::asio::error::eof)
+            {
+                std::cout << "Server closed the connection" << std::endl;
+                connected_ = false;
+            }
+            else
+            {
+                throw boost::system::system_error(error);
+            }
+        }
+
+    }
+    catch (const boost::system::system_error &e)
+    {
+        std::cerr << "Error receiving data: " << e.what() << std::endl;
+
+        // If we get a connection error, mark as disconnected
+        if (e.code() == boost::asio::error::connection_reset ||
+            e.code() == boost::asio::error::broken_pipe)
+        {
+            connected_ = false;
+        }
     }
 }
 
@@ -137,56 +191,6 @@ int Connection::send_response(const std::string *response)
     }
 }
 
-std::vector<uint8_t> Connection::read()
-{
-    if (!connected_)
-    {
-        std::cerr << "Cannot receive data: not connected" << std::endl;
-    }
-
-    try
-    {
-        std::vector<uint8_t> buffer(1024);
-        size_t bytes_read = 0;
-        boost::system::error_code error;
-
-        bytes_read = socket_.read_some(boost::asio::buffer(buffer), error);
-
-        if (bytes_read != 0 && buffer[0] != 'X')
-        {
-            for (uint8_t byte : buffer) {
-                if (byte == 0) break;
-                std::cout << static_cast<char>(byte);
-            }
-            return buffer;
-        }
-
-        if (error)
-        {
-            if (error == boost::asio::error::eof)
-            {
-                std::cout << "Server closed the connection" << std::endl;
-                connected_ = false;
-            }
-            else
-            {
-                throw boost::system::system_error(error);
-            }
-        }
-
-    }
-    catch (const boost::system::system_error &e)
-    {
-        std::cerr << "Error receiving data: " << e.what() << std::endl;
-
-        // If we get a connection error, mark as disconnected
-        if (e.code() == boost::asio::error::connection_reset ||
-            e.code() == boost::asio::error::broken_pipe)
-        {
-            connected_ = false;
-        }
-    }
-}
 
 bool Connection::is_connected() const
 {

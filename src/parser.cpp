@@ -4,7 +4,7 @@
 #include "parser.h"
 
 void parser::addToBuffer(const std::vector<uint8_t> &data) {
-    int hi = data[0];
+    
 }
 
 bool parser::isCommandValid() {

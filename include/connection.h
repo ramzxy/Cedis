@@ -21,7 +21,7 @@ public:
 
     int send_response(const std::string *response);
 
-    std::vector<uint8_t> read();
+    size_t read(std::vector<uint8_t> &);
 
     bool is_connected() const;
 
