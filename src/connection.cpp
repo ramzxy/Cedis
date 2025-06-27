@@ -5,7 +5,6 @@
 #include "parser.h"
 using namespace boost::asio::ip;
 
-
 Connection::Connection(boost::asio::io_context &io_context,
                        const std::string &server_ip,
                        int server_port)
