@@ -2,6 +2,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 #include "vector"
+#include "connection.h""
 
 class parser
 {
@@ -19,4 +20,3 @@ class parser
     std::vector<uint8_t> buffer_;
 };
 #endif //PARSER_H
-//TODO: implement all these classes

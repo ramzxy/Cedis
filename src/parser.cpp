@@ -1,14 +1,16 @@
-//
-// Created by ilia mirzaali on 25/06/2025.
-//
+
 #include "parser.h"
 
 void parser::addToBuffer(const std::vector<uint8_t> &data) {
-    
+    buffer_.insert(buffer_.end(),
+        data.begin(), data.end());
 }
 
 bool parser::isCommandValid() {
-    return true;
+    if ( buffer_[buffer_.size() - 1] == '\n'
+    && buffer_[buffer_.size() - 2] == '\r')
+        return true;
+    return false;
 }
 
 std::vector<std::string> parser::parse() {
