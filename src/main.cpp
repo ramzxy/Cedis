@@ -17,13 +17,13 @@ int main() {
 	if (!connection->start()) {
 		std::cerr << "Connection failed.";
 	}
-	std::string data = "Hello";
+	std::string data = "Hello\n";
 	std::vector<uint8_t> packet(data.begin(), data.end());
 
 	if (!connection->send_response(&data)) {
 		std::cerr << "packet send failed.";
 	}
-	while (true) {
-		connection->read();
-	}
+	connection->read(packet);
+
+	connection->handle_client();
 }	

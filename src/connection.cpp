@@ -64,11 +64,20 @@ void Connection::handle_client()
     try
     {
         std::vector<uint8_t> buffer;
-        while (parser_.isCommandValid())
+        do
+        {
+            read(buffer);
             parser_.addToBuffer(buffer);
+        }
+        while (!parser_.isCommandValid());
         auto command = parser_.parse();
 
-        //TODO: implement a command class
+        std::cout << "recieved command:" << std::endl;
+        for (int i =0; i < command.size(); i++)
+        {
+            std::cout << command[i] << std::endl;
+        }
+
     }
     catch (const boost::system::system_error &e)
     {
@@ -87,6 +96,9 @@ size_t Connection::read(std::vector<uint8_t> &buffer)
     {
         size_t bytes_read = 0;
         boost::system::error_code error;
+
+        buffer.clear();
+        buffer.resize(1024);
 
         bytes_read = socket_.read_some(boost::asio::buffer(buffer), error);
 

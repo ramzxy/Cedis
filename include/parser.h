@@ -1,8 +1,9 @@
-
 #ifndef PARSER_H
 #define PARSER_H
-#include "vector"
-#include "connection.h""
+
+#include <cstdint>
+#include <vector>
+#include <string>
 
 class parser
 {
@@ -19,4 +20,5 @@ class parser
     private:
     std::vector<uint8_t> buffer_;
 };
+
 #endif //PARSER_H
