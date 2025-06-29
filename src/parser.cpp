@@ -18,11 +18,11 @@ std::vector<std::string> parser::parse() {
     std::vector<std::string> commands;
     size_t pindex = 0;
 
-    std::string sign(buffer_[pindex], 1);
+    std::string sign(1, static_cast<char>(buffer_[0]));
     commands.push_back(sign);
 
     while (buffer_[pindex] != '\r') pindex++;
-    std::string command(buffer_[1], buffer_[pindex+1]);
+    std::string command(buffer_[1], buffer_[pindex]);
     commands.push_back(command);
     return commands;
 }

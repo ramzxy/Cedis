@@ -23,7 +23,6 @@ int main() {
 	if (!connection->send_response(&data)) {
 		std::cerr << "packet send failed.";
 	}
-	connection->read(packet);
 
 	connection->handle_client();
 }	
