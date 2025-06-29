@@ -1,6 +1,9 @@
 
 #include "parser.h"
 
+#include <iostream>
+#include <bits/ostream.tcc>
+
 void parser::addToBuffer(const std::vector<uint8_t> &data) {
     buffer_.insert(buffer_.end(), data.begin(), data.end());
 }
@@ -19,7 +22,7 @@ std::vector<std::string> parser::parse() {
     size_t pindex = 0;
 
     std::string sign(1, static_cast<char>(buffer_[0]));
-    commands.push_back(sign);
+    std::cout << "\nreceived sign: " << sign << std::endl;
 
     while (buffer_[pindex] != '\r') pindex++;
     std::string command(buffer_.begin() + 1, buffer_.begin() + pindex);

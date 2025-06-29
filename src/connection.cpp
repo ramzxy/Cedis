@@ -3,6 +3,8 @@
 #include <string>
 #include <boost/asio.hpp>
 #include "parser.h"
+#include "commands/command.cpp"
+
 using namespace boost::asio::ip;
 
 Connection::Connection(boost::asio::io_context &io_context,
