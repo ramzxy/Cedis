@@ -22,7 +22,7 @@ std::vector<std::string> parser::parse() {
     commands.push_back(sign);
 
     while (buffer_[pindex] != '\r') pindex++;
-    std::string command(buffer_[1], buffer_[pindex]);
+    std::string command(buffer_.begin() + 1, buffer_.begin() + pindex);
     commands.push_back(command);
     return commands;
 }
