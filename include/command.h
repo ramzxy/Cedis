@@ -1,13 +1,12 @@
-//
-// Created by Ilia on 30/06/2025.
-//
 
 #ifndef COMMAND_H
 #define COMMAND_H
+#include <vector>
+
 class command
 {
-    virtual ~command() = default;
 public:
+     virtual ~command() = default;
     virtual std::string execute(const std::vector<std::string> &args) = 0;
 };
 

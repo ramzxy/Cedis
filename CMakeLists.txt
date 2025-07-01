@@ -44,8 +44,6 @@ add_executable(${PROJECT_NAME}
     src/main.cpp
     src/connection.cpp
     src/parser.cpp
-        include/command.h
-        include/handleCMD.h
         src/handleCMD.cpp
 )
 

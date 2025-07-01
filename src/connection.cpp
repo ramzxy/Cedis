@@ -2,8 +2,9 @@
 #include <iostream>
 #include <string>
 #include <boost/asio.hpp>
+
+#include "handleCMD.h"
 #include "parser.h"
-#include "commands/command.cpp"
 
 using namespace boost::asio::ip;
 
@@ -79,6 +80,9 @@ void Connection::handle_client()
         {
             std::cout << command[i] << std::endl;
         }
+
+        std::string response = handleCMD().execute(command);
+        send_response(&response);
 
     }
     catch (const boost::system::system_error &e)
