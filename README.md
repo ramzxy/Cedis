@@ -2,7 +2,6 @@
 
 Cedis is a high-performance, lightweight in-memory key-value store, inspired by [Redis](https://redis.io/) and built from scratch in modern C++17 using Boost.Asio for asynchronous networking.
 
-Whether you're a systems programmer, C++ enthusiast, or curious about how databases like Redis work under the hood — **Cedis** is a clean, educational, and extensible project.
 
 
 
