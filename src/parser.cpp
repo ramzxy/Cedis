@@ -1,8 +1,6 @@
 
 #include "parser.h"
-
 #include <iostream>
-#include <bits/ostream.tcc>
 
 void parser::addToBuffer(const std::vector<uint8_t> &data) {
     buffer_.insert(buffer_.end(), data.begin(), data.end());
@@ -16,42 +14,63 @@ bool parser::isCommandValid() {
         return true;
     return false;
 }
-//TODO: Fix parser
+
 std::vector<std::string> parser::parse() {
+
+    std::vector<std::string> commands;
+
+    size_t offset = 0;
+
     char prefix = buffer_[0];
     switch (prefix)
     {
     case '+':
-        simpleStringParse();
+        simpleStringParse(offset);
         break;
 
     case '-':
-        errorParse();
+        errorParse(offset);
         break;
     case ':':
-        intParse();
+        intParse(offset);
         break;
 
     case '*':
-        arrayParse();
+        arrayParse(offset);
         break;
 
     case '$':
-        bulkStringParse();
+        bulkStringParse(offset);
         break;
 
     default:
         return {"Prefix Error"};
     }
 
-    std::vector<std::string> commands;
-    size_t pindex = 0;
-
-    std::string sign(1, static_cast<char>(buffer_[0]));
-    std::cout << "\nreceived sign: " << sign << std::endl;
-
-    while (buffer_[pindex] != '\r') pindex++;
-    std::string command(buffer_.begin() + 1, buffer_.begin() + pindex);
-    commands.push_back(command);
     return commands;
+}
+
+std::string parser::simpleStringParse(size_t& offset)
+{
+    return "ok";
+}
+
+std::string parser::errorParse(size_t& offset)
+{
+    return "error";
+}
+
+std::string parser::intParse(size_t& offset)
+{
+    return "int";
+}
+
+std::string parser::bulkStringParse(size_t& offset)
+{
+    return "bulkString";
+}
+
+std::vector<std::string> parser::arrayParse(size_t& offset)
+{
+    return {"ok"};
 }

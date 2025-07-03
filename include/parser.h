@@ -19,6 +19,11 @@ class parser
 
     private:
     std::vector<uint8_t> buffer_;
+    std::string simpleStringParse(size_t&);
+    std::string errorParse(size_t&);
+    std::string intParse(size_t&);
+    std::string bulkStringParse(size_t&);
+    std::vector<std::string> arrayParse(size_t&);
 };
 
 #endif PARSER_H
