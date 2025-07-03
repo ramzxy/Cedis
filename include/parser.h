@@ -21,4 +21,4 @@ class parser
     std::vector<uint8_t> buffer_;
 };
 
-#endif //PARSER_H
+#endif PARSER_H

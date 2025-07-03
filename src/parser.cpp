@@ -18,6 +18,32 @@ bool parser::isCommandValid() {
 }
 //TODO: Fix parser
 std::vector<std::string> parser::parse() {
+    char prefix = buffer_[0];
+    switch (prefix)
+    {
+    case '+':
+        simpleStringParse();
+        break;
+
+    case '-':
+        errorParse();
+        break;
+    case ':':
+        intParse();
+        break;
+
+    case '*':
+        arrayParse();
+        break;
+
+    case '$':
+        bulkStringParse();
+        break;
+
+    default:
+        return {"Prefix Error"};
+    }
+
     std::vector<std::string> commands;
     size_t pindex = 0;
 

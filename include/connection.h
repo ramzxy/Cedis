@@ -44,4 +44,4 @@ private:
     parser parser_;
 };
 
-#endif // CONNECTION_H 
+#endif  CONNECTION_H

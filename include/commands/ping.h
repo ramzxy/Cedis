@@ -1,5 +1,5 @@
-#include <vector>
-
+#ifndef PING_H
+#define PING_H
 #include "command.h"
 
 class ping : public command
@@ -10,3 +10,5 @@ public:
         return "+PONG\r\n";
     }
 };
+
+#endif PING_H
