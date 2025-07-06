@@ -25,7 +25,7 @@ std::vector<std::string> parser::parse() {
     switch (prefix)
     {
     case '+':
-        simpleStringParse(offset);
+         commands.push_back(simpleStringParse(offset));
         break;
 
     case '-':
@@ -52,7 +52,15 @@ std::vector<std::string> parser::parse() {
 
 std::string parser::simpleStringParse(size_t& offset)
 {
-    return "ok";
+    offset++; //move after prefix
+    std::string command;
+    while (buffer_[offset] == '\r')
+    {
+        command += static_cast<char>(buffer_[offset]);
+        offset++;
+    }
+
+    return command;
 }
 
 std::string parser::errorParse(size_t& offset)
@@ -65,9 +73,9 @@ std::string parser::intParse(size_t& offset)
     return "int";
 }
 
-std::string parser::bulkStringParse(size_t& offset)
+std::vector<std::string> parser::bulkStringParse(size_t& offset)
 {
-    return "bulkString";
+    return {"bulkString"};
 }
 
 std::vector<std::string> parser::arrayParse(size_t& offset)
