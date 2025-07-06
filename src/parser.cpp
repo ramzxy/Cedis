@@ -1,6 +1,7 @@
 
 #include "parser.h"
 #include <iostream>
+#include <boost/asio/buffer.hpp>
 
 void parser::addToBuffer(const std::vector<uint8_t> &data) {
     buffer_.insert(buffer_.end(), data.begin(), data.end());
@@ -40,7 +41,7 @@ std::vector<std::string> parser::parse() {
         break;
 
     case '$':
-        bulkStringParse(offset);
+        commands.push_back(bulkStringParse(offset));
         break;
 
     default:
@@ -54,7 +55,7 @@ std::string parser::simpleStringParse(size_t& offset)
 {
     offset++; //move after prefix
     std::string command;
-    while (buffer_[offset] == '\r')
+    while (buffer_[offset] != '\r')
     {
         command += static_cast<char>(buffer_[offset]);
         offset++;
@@ -73,12 +74,21 @@ std::string parser::intParse(size_t& offset)
     return "int";
 }
 
-std::vector<std::string> parser::bulkStringParse(size_t& offset)
+std::string parser::bulkStringParse(size_t& offset)
 {
     return {"bulkString"};
 }
 
 std::vector<std::string> parser::arrayParse(size_t& offset)
 {
+    offset++; //move after prefix
+    int numCommands = buffer_[offset];
+    offset += 2; //move after opening clrf
+
+    for (int i = 0; i < numCommands; i++)
+    {
+        std::vector<std::string> commands = parse();
+    }
+
     return {"ok"};
 }
