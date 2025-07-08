@@ -112,6 +112,7 @@ std::vector<std::string> parser::arrayParse(size_t& offset)
             commands_.push_back(bulkStringParse(offset));
             break;
         }
+        offset += 2; //skip \r\n
     }
 
     return commands_;

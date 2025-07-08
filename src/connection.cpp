@@ -73,7 +73,7 @@ void Connection::handle_client()
             parser_.addToBuffer(buffer);
         }
         while (!parser_.isCommandValid());
-        auto command = parser_.parse(0);
+        auto command = parser_.parse();
 
         std::cout << "recieved command:" << std::endl;
         for (int i =0; i < command.size(); i++)

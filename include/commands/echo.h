@@ -8,6 +8,7 @@ class echo : public command
 public:
     std::string execute(const std::vector<std::string>& args) override
     {
+        std::string echo_str = args[1] + "\r\n";
         return args[1];
     }
 };

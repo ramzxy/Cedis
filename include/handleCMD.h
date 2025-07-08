@@ -3,9 +3,11 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include "command.h"
 #include "commands/ping.h"
-#include <vector>
+#include "commands/echo.h"
+
 
 class handleCMD
 {
@@ -13,6 +15,7 @@ class handleCMD
     handleCMD()
     {
         command_["PING"] = std::make_unique<ping>();
+        command_["ECHO"] = std::make_unique<echo>();
     }
 
     std::string execute(const std::vector<std::string> &input);
