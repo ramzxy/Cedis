@@ -19,7 +19,6 @@ bool parser::isCommandValid() {
 std::vector<std::string> parser::parse() {
 
     std::vector<std::string> commands;
-
     size_t offset = 0;
 
     char prefix = buffer_[0];
@@ -30,18 +29,18 @@ std::vector<std::string> parser::parse() {
         break;
 
     case '-':
-        errorParse(offset);
+        commands.push_back(errorParse(offset));
         break;
     case ':':
-        intParse(offset);
-        break;
-
-    case '*':
-        arrayParse(offset);
+        commands.push_back(intParse(offset));
         break;
 
     case '$':
         commands.push_back(bulkStringParse(offset));
+        break;
+
+    case '*':
+        return arrayParse(offset);
         break;
 
     default:
@@ -53,7 +52,7 @@ std::vector<std::string> parser::parse() {
 
 std::string parser::simpleStringParse(size_t& offset)
 {
-    offset++; //move after prefix
+    offset++; //skip prefix
     std::string command;
     while (buffer_[offset] != '\r')
     {
@@ -81,14 +80,39 @@ std::string parser::bulkStringParse(size_t& offset)
 
 std::vector<std::string> parser::arrayParse(size_t& offset)
 {
-    offset++; //move after prefix
-    int numCommands = buffer_[offset];
-    offset += 2; //move after opening clrf
+    std::string numArrStr;
+    std::vector<std::string> commands_;
 
-    for (int i = 0; i < numCommands; i++)
+    offset++; //skip prefix
+
+    while (buffer_[offset] != '\r')
     {
-        std::vector<std::string> commands = parse();
+        numArrStr += static_cast<char>(buffer_[offset++]); //parse num of elements
+    }
+    int numArr = std::stoi(numArrStr);
+
+    offset += 2; //skip \r\n
+
+    for (int i = 0; i < numArr; i++)
+    {
+        switch (buffer_[offset])
+        {
+        case '+':
+            commands_.push_back(simpleStringParse(offset));
+            break;
+
+        case '-':
+            commands_.push_back(errorParse(offset));
+            break;
+        case ':':
+            commands_.push_back(intParse(offset));
+            break;
+
+        case '$':
+            commands_.push_back(bulkStringParse(offset));
+            break;
+        }
     }
 
-    return {"ok"};
+    return commands_;
 }
