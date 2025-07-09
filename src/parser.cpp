@@ -74,7 +74,7 @@ std::string parser::bulkStringParse(size_t& offset)
 
     std::string command(reinterpret_cast<const char*>(&buffer_[offset]), numChar);
 
-    offset += numChar + 2; //skip string and \r\n
+    offset += numChar; //skip string and \r\n
     return command;
 }
 
