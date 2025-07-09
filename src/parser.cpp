@@ -60,7 +60,6 @@ std::string parser::simpleStringParse(size_t& offset)
 
 std::string parser::bulkStringParse(size_t& offset)
 {
-    std::string command;
     std::string numCharStr;
 
     offset++; //skip prefix
@@ -73,11 +72,9 @@ std::string parser::bulkStringParse(size_t& offset)
 
     offset += 2; //skip \r\n
 
-    for (int i = 0; i < numChar; i++)
-    {
-        command += static_cast<char>(buffer_[offset++]);
-    }
+    std::string command(reinterpret_cast<const char*>(&buffer_[offset]), numChar);
 
+    offset += numChar + 2; //skip string and \r\n
     return command;
 }
 

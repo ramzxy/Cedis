@@ -43,7 +43,7 @@ bool Connection::start()
         std::cout << "TCP connection established to "
             << server_ip_ << ":" << server_port_ << std::endl;
 
-        std::cout << "VPN connection established successfully" << std::endl;
+        std::cout << "Redis connection established successfully" << std::endl;
         return true;
     }
 
@@ -159,7 +159,7 @@ void Connection::disconnect()
         socket_.close();
 
         connected_ = false;
-        std::cout << "Disconnected from VPN server" << std::endl;
+        std::cout << "Disconnected from Redis server" << std::endl;
     }
     catch (const boost::system::system_error& e)
     {
