@@ -1,23 +1,25 @@
-
 #include "parser.h"
 #include <iostream>
 #include <boost/asio/buffer.hpp>
 
-void parser::addToBuffer(const std::vector<uint8_t> &data) {
+
+void parser::addToBuffer(const std::vector<uint8_t>& data)
+{
     buffer_.insert(buffer_.end(), data.begin(), data.end());
 }
 
-bool parser::isCommandValid() {
+bool parser::isCommandValid()
+{
     if (buffer_.size() < 2) return false;
 
-    if ( buffer_[buffer_.size() - 1] == '\n'
-    && buffer_[buffer_.size() - 2] == '\r')
+    if (buffer_[buffer_.size() - 1] == '\n'
+        && buffer_[buffer_.size() - 2] == '\r')
         return true;
     return false;
 }
 
-std::vector<std::string> parser::parse() {
-
+std::vector<std::string> parser::parse()
+{
     std::vector<std::string> commands;
     size_t offset = 0;
 
@@ -25,14 +27,7 @@ std::vector<std::string> parser::parse() {
     switch (prefix)
     {
     case '+':
-         commands.push_back(simpleStringParse(offset));
-        break;
-
-    case '-':
-        commands.push_back(errorParse(offset));
-        break;
-    case ':':
-        commands.push_back(intParse(offset));
+        commands.push_back(simpleStringParse(offset));
         break;
 
     case '$':
@@ -63,19 +58,27 @@ std::string parser::simpleStringParse(size_t& offset)
     return command;
 }
 
-std::string parser::errorParse(size_t& offset)
-{
-    return "error";
-}
-
-std::string parser::intParse(size_t& offset)
-{
-    return "int";
-}
-
 std::string parser::bulkStringParse(size_t& offset)
 {
-    return {"bulkString"};
+    std::string command;
+    std::string numCharStr;
+
+    offset++; //skip prefix
+
+    while (buffer_[offset] != '\r')
+    {
+        numCharStr += static_cast<char>(buffer_[offset++]); //parse num of chars
+    }
+    int numChar = std::stoi(numCharStr);
+
+    offset += 2; //skip \r\n
+
+    for (int i = 0; i < numChar; i++)
+    {
+        command += static_cast<char>(buffer_[offset++]);
+    }
+
+    return command;
 }
 
 std::vector<std::string> parser::arrayParse(size_t& offset)
@@ -99,13 +102,6 @@ std::vector<std::string> parser::arrayParse(size_t& offset)
         {
         case '+':
             commands_.push_back(simpleStringParse(offset));
-            break;
-
-        case '-':
-            commands_.push_back(errorParse(offset));
-            break;
-        case ':':
-            commands_.push_back(intParse(offset));
             break;
 
         case '$':

@@ -8,8 +8,8 @@
 
 using namespace boost::asio::ip;
 
-Connection::Connection(boost::asio::io_context &io_context,
-                       const std::string &server_ip,
+Connection::Connection(boost::asio::io_context& io_context,
+                       const std::string& server_ip,
                        int server_port)
     : io_context_(io_context),
       socket_(io_context),
@@ -19,14 +19,12 @@ Connection::Connection(boost::asio::io_context &io_context,
       connected_(false)
 
 {
-
     std::cout << "Connection object initialized with server: "
-              << server_ip << ":" << server_port << std::endl;
+        << server_ip << ":" << server_port << std::endl;
 }
 
 Connection::~Connection()
 {
-
     if (connected_)
     {
         disconnect();
@@ -43,14 +41,14 @@ bool Connection::start()
 
         connected_ = true;
         std::cout << "TCP connection established to "
-                  << server_ip_ << ":" << server_port_ << std::endl;
+            << server_ip_ << ":" << server_port_ << std::endl;
 
         std::cout << "VPN connection established successfully" << std::endl;
-        return true;    }
+        return true;
+    }
 
-    catch (const boost::system::system_error &e)
+    catch (const boost::system::system_error& e)
     {
-
         std::cerr << "Connection error: " << e.what() << std::endl;
         connected_ = false;
         return false;
@@ -76,22 +74,21 @@ void Connection::handle_client()
         auto command = parser_.parse();
 
         std::cout << "recieved command:" << std::endl;
-        for (int i =0; i < command.size(); i++)
+        for (int i = 0; i < command.size(); i++)
         {
             std::cout << command[i] << std::endl;
         }
 
         std::string response = handleCMD().execute(command);
         send_response(&response);
-
     }
-    catch (const boost::system::system_error &e)
+    catch (const boost::system::system_error& e)
     {
         std::cerr << "Error handling client: " << e.what() << std::endl;
     }
 }
 
-size_t Connection::read(std::vector<uint8_t> &buffer)
+size_t Connection::read(std::vector<uint8_t>& buffer)
 {
     if (!connected_)
     {
@@ -112,7 +109,8 @@ size_t Connection::read(std::vector<uint8_t> &buffer)
 
         if (bytes_read != 0 && buffer[0] != 'X')
         {
-            for (uint8_t byte : buffer) {
+            for (uint8_t byte : buffer)
+            {
                 if (byte == 0) break;
                 std::cout << static_cast<char>(byte);
             }
@@ -131,9 +129,8 @@ size_t Connection::read(std::vector<uint8_t> &buffer)
                 throw boost::system::system_error(error);
             }
         }
-
     }
-    catch (const boost::system::system_error &e)
+    catch (const boost::system::system_error& e)
     {
         std::cerr << "Error receiving data: " << e.what() << std::endl;
 
@@ -155,7 +152,6 @@ void Connection::disconnect()
 
     try
     {
-
         // This is a courtesy to let the server know we're disconnecting
         std::string disconnect_msg = "DISCONNECT";
         boost::asio::write(socket_, boost::asio::buffer(disconnect_msg));
@@ -165,7 +161,7 @@ void Connection::disconnect()
         connected_ = false;
         std::cout << "Disconnected from VPN server" << std::endl;
     }
-    catch (const boost::system::system_error &e)
+    catch (const boost::system::system_error& e)
     {
         // If there's an error during disconnect, just log it
         std::cerr << "Error during disconnect: " << e.what() << std::endl;
@@ -173,7 +169,7 @@ void Connection::disconnect()
     }
 }
 
-int Connection::send_response(const std::string *response)
+int Connection::send_response(const std::string* response)
 {
     if (!connected_)
     {
@@ -193,7 +189,7 @@ int Connection::send_response(const std::string *response)
         }
         return static_cast<int>(bytes_sent);
     }
-    catch (const boost::system::system_error &e)
+    catch (const boost::system::system_error& e)
     {
         std::cerr << "Error sending data: " << e.what() << std::endl;
 
@@ -213,5 +209,3 @@ bool Connection::is_connected() const
 {
     return connected_ && socket_.is_open();
 }
-
-

@@ -6,11 +6,11 @@
 #include <boost/asio.hpp>
 #include "parser.h"
 
-class Connection {
+class Connection
+{
 public:
-
-    Connection(boost::asio::io_context& io_context, 
-               const std::string& server_ip, 
+    Connection(boost::asio::io_context& io_context,
+               const std::string& server_ip,
                int server_port);
 
     ~Connection();
@@ -19,9 +19,9 @@ public:
 
     void handle_client();
 
-    int send_response(const std::string *response);
+    int send_response(const std::string* response);
 
-    size_t read(std::vector<uint8_t> &);
+    size_t read(std::vector<uint8_t>&);
 
     bool is_connected() const;
 

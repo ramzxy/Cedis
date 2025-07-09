@@ -11,16 +11,16 @@
 
 class handleCMD
 {
-    public:
+public:
     handleCMD()
     {
         command_["PING"] = std::make_unique<ping>();
         command_["ECHO"] = std::make_unique<echo>();
     }
 
-    std::string execute(const std::vector<std::string> &input);
+    std::string execute(const std::vector<std::string>& input);
 
-    private:
+private:
     std::unordered_map<std::string, std::unique_ptr<command>> command_;
 };
 #endif HANDLECMD_H
