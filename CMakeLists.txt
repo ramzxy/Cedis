@@ -50,6 +50,8 @@ add_executable(${PROJECT_NAME}
         src/database.cpp
         include/commands/setCommand.h
         include/commands/getCommand.h
+        include/commands/delCommand.h
+        include/commands/existsCommand.h
 )
 
 # Include directories - add the include folder for headers
