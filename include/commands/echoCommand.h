@@ -3,8 +3,9 @@
 #include "command.h"
 
 
-class echo : public command
+class echoCommand : public command
 {
+    using command::command;
 public:
     std::string execute(const std::vector<std::string>& args) override
     {

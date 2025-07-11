@@ -2,6 +2,7 @@
 #include "connection.h"
 #include <vector>
 #include <boost/asio.hpp>
+#include "database.h"
 
 using namespace boost::asio;
 
@@ -9,11 +10,12 @@ int main()
 {
     std::string server_ip = "127.0.0.1";
     int server_port = 6969;
+    database db;
 
     std::cout << "Hello, Boost.Asio!" << std::endl;
     io_context io_context;
 
-    auto connection = std::make_shared<Connection>(io_context, server_ip, server_port);
+    auto connection = std::make_shared<Connection>(io_context, server_ip, server_port, db);
 
     if (!connection->start())
     {

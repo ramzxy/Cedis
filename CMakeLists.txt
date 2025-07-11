@@ -45,8 +45,11 @@ add_executable(${PROJECT_NAME}
     src/connection.cpp
     src/parser.cpp
         src/handleCMD.cpp
-        include/commands/echo.h
+        include/commands/echoCommand.h
         include/database.h
+        src/database.cpp
+        include/commands/setCommand.h
+        include/commands/getCommand.h
 )
 
 # Include directories - add the include folder for headers

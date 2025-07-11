@@ -4,6 +4,8 @@
 
 #include <string>
 #include <boost/asio.hpp>
+
+#include "database.h"
 #include "parser.h"
 
 class Connection
@@ -11,7 +13,8 @@ class Connection
 public:
     Connection(boost::asio::io_context& io_context,
                const std::string& server_ip,
-               int server_port);
+               int server_port,
+               database& db);
 
     ~Connection();
 
@@ -42,6 +45,9 @@ private:
 
     // Parser object
     parser parser_;
+
+    // Database object
+    database& db_;
 };
 
 #endif  CONNECTION_H

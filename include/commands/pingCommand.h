@@ -2,8 +2,9 @@
 #define PING_H
 #include "command.h"
 
-class ping : public command
+class pingCommand : public command
 {
+    using command::command;
 public:
     std::string execute(const std::vector<std::string>& args) override
     {
