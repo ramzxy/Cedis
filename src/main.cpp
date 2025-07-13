@@ -19,13 +19,18 @@ int main()
 
     // Create a shared command handler that uses the same database
     auto handle = std::make_shared<handleCMD>(db);
-    auto connection = std::make_shared<Connection>(io_context, server_ip, server_port, db);
+
+    auto connection = std::make_shared<Connection>(io_context,
+        server_ip,
+        server_port,
+        handle);
 
     if (!connection->start())
     {
         std::cerr << "Connection failed.";
     }
 
-    while (true)
-        connection->handle_client();
+    connection->handle_client();
+
+    db->save_local_store();
 }

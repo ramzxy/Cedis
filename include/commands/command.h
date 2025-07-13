@@ -11,8 +11,6 @@ public:
     virtual std::string execute(const std::vector<std::string> &args,
                                 std::shared_ptr<database> db_) = 0;
 
-protected:
-    database db_;
 };
 
 #endif COMMAND_H

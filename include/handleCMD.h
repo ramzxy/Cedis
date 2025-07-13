@@ -9,6 +9,9 @@
 #include "commands/pingCommand.h"
 #include "commands/echoCommand.h"
 #include "commands/setCommand.h"
+#include "commands/getCommand.h"
+#include "commands/delCommand.h"
+#include "commands/existsCommand.h"
 
 
 class handleCMD

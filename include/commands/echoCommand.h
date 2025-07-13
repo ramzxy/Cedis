@@ -7,7 +7,8 @@ class echoCommand : public command
 {
     using command::command;
 public:
-    std::string execute(const std::vector<std::string>& args) override
+    std::string execute(const std::vector<std::string>& args,
+        std::shared_ptr<database> db_) override
     {
         return args[1] + "\r\n";
     }
