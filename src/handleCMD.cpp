@@ -2,8 +2,13 @@
 
 #include <algorithm>
 
-std::string handleCMD::handle(const std::vector<std::string>& input)
-{
+handleCMD::handleCMD(std::shared_ptr<database> db) : db_(db) {
+    command_["PING"] = std::make_unique<pingCommand>();
+    command_["ECHO"] = std::make_unique<echoCommand>();
+    command_["SET"] = std::make_unique<setCommand>();
+}
+
+std::string handleCMD::handle(const std::vector<std::string> &input) {
     if (input.empty()) return "Command is empty\r\n";
 
     std::string cmd = input[0];
@@ -13,5 +18,5 @@ std::string handleCMD::handle(const std::vector<std::string>& input)
     auto it = command_.find(cmd);
     if (it == command_.end()) return "Command not found\r\n";
 
-    return it->second->execute(input);
+    return it->second->execute(input, db_);
 }

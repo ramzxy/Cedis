@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 
 #include "database.h"
+#include "handleCMD.h"
 #include "parser.h"
 
 class Connection
@@ -14,7 +15,7 @@ public:
     Connection(boost::asio::io_context& io_context,
                const std::string& server_ip,
                int server_port,
-               database& db);
+               std::shared_ptr<handleCMD> handler_);
 
     ~Connection();
 
@@ -46,8 +47,8 @@ private:
     // Parser object
     parser parser_;
 
-    // Database object
-    database& db_;
+    // command handler object
+    std::shared_ptr<handleCMD> handler_;
 };
 
 #endif  CONNECTION_H

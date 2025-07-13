@@ -11,14 +11,15 @@ using namespace boost::asio::ip;
 Connection::Connection(boost::asio::io_context& io_context,
                        const std::string& server_ip,
                        int server_port,
-                       database& db)
+                       std::shared_ptr<handleCMD> handler)
     : io_context_(io_context),
       socket_(io_context),
       acceptor_(io_context, tcp::endpoint(tcp::v4(), server_port)),
       server_port_(server_port),
       server_ip_(server_ip),
       connected_(false),
-      db_(db)
+      handler_(handler)
+
 
 {
     std::cout << "Connection object initialized with server: "
@@ -81,7 +82,7 @@ void Connection::handle_client()
             std::cout << command[i] << std::endl;
         }
 
-        std::string response = handleCMD(db_).handle(command);
+        std::string response = handler_->handle(command);
         send_response(&response);
     }
     catch (const boost::system::system_error& e)
@@ -205,7 +206,6 @@ int Connection::send_response(const std::string* response)
         return -1;
     }
 }
-
 
 bool Connection::is_connected() const
 {
