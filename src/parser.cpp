@@ -35,13 +35,13 @@ std::vector<std::string> parser::parse()
         break;
 
     case '*':
-        return arrayParse(offset);
+        commands =  arrayParse(offset);
         break;
 
     default:
         return {"Prefix Error"};
     }
-
+    buffer_.erase(buffer_.begin(), buffer_.begin() + offset);
     return commands;
 }
 

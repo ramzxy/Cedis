@@ -68,22 +68,26 @@ void Connection::handle_client()
     try
     {
         std::vector<uint8_t> buffer;
-        do
-        {
-            read(buffer);
-            parser_.addToBuffer(buffer);
-        }
-        while (!parser_.isCommandValid());
-        auto command = parser_.parse();
+        while (is_connected()) {
+            do
+            {
+                read(buffer);
+                if (buffer.empty()) continue;
+                parser_.addToBuffer(buffer);
+            }
+            while (!parser_.isCommandValid());
 
-        std::cout << "recieved command:" << std::endl;
-        for (int i = 0; i < command.size(); i++)
-        {
-            std::cout << command[i] << std::endl;
-        }
+            auto command = parser_.parse();
 
-        std::string response = handler_->handle(command);
-        send_response(&response);
+            std::cout << "recieved command:" << std::endl;
+            for (int i = 0; i < command.size(); i++)
+            {
+                std::cout << command[i] << std::endl;
+            }
+
+            std::string response = handler_->handle(command);
+            send_response(&response);
+        }
     }
     catch (const boost::system::system_error& e)
     {
