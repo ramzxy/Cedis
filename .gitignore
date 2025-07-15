@@ -16,3 +16,4 @@ cmake_install.cmake
 *.vcxproj*
 .vs/
 
+CODE_REVIEW.md

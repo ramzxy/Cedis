@@ -6,9 +6,13 @@ class delCommand : public command {
 public:
     std::string execute(const std::vector<std::string> &args,
                         std::shared_ptr<database> db_) override {
-        if (args.size() != 2) return "Wrong number of arguments\r\n";
+        if (args.size() != 2) {
+            return "-ERR wrong number of arguments for 'del' command\r\n";
+        }
 
-        return db_->del(args[1]) ? "+OK\r\n" : "-ERR\r\n";
+        // Return number of keys deleted (0 or 1)
+        bool deleted = db_->del(args[1]);
+        return ":" + std::to_string(deleted ? 1 : 0) + "\r\n";
     }
 };
 #endif //DELCOMMAND_H

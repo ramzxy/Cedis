@@ -13,9 +13,13 @@ class existsCommand : public command
         std::string execute(const std::vector<std::string>& args,
             std::shared_ptr<database> db_) override
         {
-            if (args.size() != 2) return "Wrong number of arguments\r\n";
+            if (args.size() != 2) {
+                return "-ERR wrong number of arguments for 'exists' command\r\n";
+            }
 
-            return db_->exists(args[1]) ? "+OK\r\n" : "-ERR\r\n";
+            // Return integer 1 if exists, 0 if not (Redis format)
+            bool exists = db_->exists(args[1]);
+            return ":" + std::to_string(exists ? 1 : 0) + "\r\n";
         }
 };
 #endif //EXISTSCOMMAND_H

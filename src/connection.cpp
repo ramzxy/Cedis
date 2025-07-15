@@ -63,30 +63,45 @@ void Connection::handle_client()
     if (!connected_)
     {
         std::cerr << "Cannot handle client: not connected" << std::endl;
+        return;
     }
     //TODO: add async and make sure these can run multi command.
     try
     {
         std::vector<uint8_t> buffer;
         while (is_connected()) {
-            do
-            {
-                read(buffer);
-                if (buffer.empty()) continue;
-                parser_.addToBuffer(buffer);
+            try {
+                do
+                {
+                    read(buffer);
+                    if (buffer.empty()) continue;
+                    parser_.addToBuffer(buffer);
+                }
+                while (!parser_.isCommandValid());
+
+                auto command = parser_.parse();
+
+                // Check if parser returned an error
+                if (!command.empty() && command[0].substr(0, 3) == "ERR") {
+                    std::string error_response = "-" + command[0] + "\r\n";
+                    send_response(&error_response);
+                    continue;
+                }
+
+                std::cout << "received command:" << std::endl;
+                for (int i = 0; i < command.size(); i++)
+                {
+                    std::cout << command[i] << std::endl;
+                }
+
+                std::string response = handler_->handle(command);
+                send_response(&response);
+            } catch (const std::exception& e) {
+                // Send error response for command processing errors
+                std::string error_response = "-ERR " + std::string(e.what()) + "\r\n";
+                send_response(&error_response);
+                std::cerr << "Command processing error: " << e.what() << std::endl;
             }
-            while (!parser_.isCommandValid());
-
-            auto command = parser_.parse();
-
-            std::cout << "recieved command:" << std::endl;
-            for (int i = 0; i < command.size(); i++)
-            {
-                std::cout << command[i] << std::endl;
-            }
-
-            std::string response = handler_->handle(command);
-            send_response(&response);
         }
     }
     catch (const boost::system::system_error& e)
@@ -100,6 +115,7 @@ size_t Connection::read(std::vector<uint8_t>& buffer)
     if (!connected_)
     {
         std::cerr << "Cannot receive data: not connected" << std::endl;
+        return 0;
     }
 
     try
@@ -130,12 +146,15 @@ size_t Connection::read(std::vector<uint8_t>& buffer)
             {
                 std::cout << "Server closed the connection" << std::endl;
                 connected_ = false;
+                return 0;
             }
             else
             {
                 throw boost::system::system_error(error);
             }
         }
+
+        return bytes_read;
     }
     catch (const boost::system::system_error& e)
     {
@@ -147,6 +166,8 @@ size_t Connection::read(std::vector<uint8_t>& buffer)
         {
             connected_ = false;
         }
+        
+        return 0;
     }
 }
 
