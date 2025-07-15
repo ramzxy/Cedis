@@ -13,7 +13,7 @@ public:
         if (args.size() < 2) {
             return "-ERR wrong number of arguments for 'echo' command\r\n";
         }
-        return args[1] + "\r\n";
+        return "$" + std::to_string(args[1].length()) + "\r\n" + args[1] + "\r\n";
     }
 };
 

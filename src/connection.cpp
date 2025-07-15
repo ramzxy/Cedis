@@ -65,7 +65,6 @@ void Connection::handle_client()
         std::cerr << "Cannot handle client: not connected" << std::endl;
         return;
     }
-    //TODO: add async and make sure these can run multi command.
     try
     {
         std::vector<uint8_t> buffer;
@@ -80,6 +79,9 @@ void Connection::handle_client()
                 while (!parser_.isCommandValid());
 
                 auto command = parser_.parse();
+
+                if (command[0] == "QUIT")
+                    disconnect();
 
                 // Check if parser returned an error
                 if (!command.empty() && command[0].substr(0, 3) == "ERR") {
@@ -130,22 +132,15 @@ size_t Connection::read(std::vector<uint8_t>& buffer)
 
         buffer.resize(bytes_read);
 
-        if (bytes_read != 0 && buffer[0] != 'X')
-        {
-            for (uint8_t byte : buffer)
-            {
-                if (byte == 0) break;
-                std::cout << static_cast<char>(byte);
-            }
+        if (bytes_read != 0)
             return bytes_read;
-        }
 
         if (error)
         {
             if (error == boost::asio::error::eof)
             {
                 std::cout << "Server closed the connection" << std::endl;
-                connected_ = false;
+                disconnect();
                 return 0;
             }
             else
@@ -164,7 +159,7 @@ size_t Connection::read(std::vector<uint8_t>& buffer)
         if (e.code() == boost::asio::error::connection_reset ||
             e.code() == boost::asio::error::broken_pipe)
         {
-            connected_ = false;
+            disconnect();
         }
         
         return 0;
@@ -181,7 +176,7 @@ void Connection::disconnect()
     try
     {
         // This is a courtesy to let the server know we're disconnecting
-        std::string disconnect_msg = "DISCONNECT";
+        std::string disconnect_msg = "+OK\r\n";
         boost::asio::write(socket_, boost::asio::buffer(disconnect_msg));
 
         socket_.close();
@@ -225,7 +220,7 @@ int Connection::send_response(const std::string* response)
         if (e.code() == boost::asio::error::connection_reset ||
             e.code() == boost::asio::error::broken_pipe)
         {
-            connected_ = false;
+            disconnect();
         }
 
         return -1;
