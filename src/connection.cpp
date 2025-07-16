@@ -8,22 +8,13 @@
 
 using namespace boost::asio::ip;
 
-Connection::Connection(boost::asio::io_context& io_context,
-                       const std::string& server_ip,
-                       int server_port,
+Connection::Connection(std::shared_ptr<tcp::socket> socket,
                        std::shared_ptr<handleCMD> handler)
-    : io_context_(io_context),
-      socket_(io_context),
-      acceptor_(io_context, tcp::endpoint(tcp::v4(), server_port)),
-      server_port_(server_port),
-      server_ip_(server_ip),
+    : socket_(std::move(socket)),
       connected_(false),
-      handler_(handler)
-
-
+      handler_(std::move(handler))
 {
-    std::cout << "Connection object initialized with server: "
-        << server_ip << ":" << server_port << std::endl;
+    std::cout << "Connection object initialized with server: ";
 }
 
 Connection::~Connection()
@@ -40,11 +31,8 @@ bool Connection::start()
 {
     try
     {
-        acceptor_.accept(socket_);
-
         connected_ = true;
-        std::cout << "TCP connection established to "
-            << server_ip_ << ":" << server_port_ << std::endl;
+        std::cout << "TCP connection established to " << std::endl;
 
         std::cout << "Redis connection established successfully" << std::endl;
         return true;

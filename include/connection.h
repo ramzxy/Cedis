@@ -12,10 +12,8 @@
 class Connection
 {
 public:
-    Connection(boost::asio::io_context& io_context,
-               const std::string& server_ip,
-               int server_port,
-               std::shared_ptr<handleCMD> handler_);
+    Connection(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
+               std::shared_ptr<handleCMD>);
 
     ~Connection();
 
@@ -33,13 +31,7 @@ public:
 
 private:
     // Boost ASIO components for networking
-    boost::asio::io_context& io_context_;
-    boost::asio::ip::tcp::socket socket_;
-    boost::asio::ip::tcp::acceptor acceptor_;
-
-    // Server connection details
-    int server_port_;
-    std::string server_ip_;
+    std::shared_ptr<boost::asio::ip::tcp::socket> socket_;
 
     // Connection state
     bool connected_;

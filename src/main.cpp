@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include "connection.h"
+#include "server.h"
 #include <boost/asio.hpp>
 #include "database.h"
 #include "handleCMD.h"
@@ -11,8 +12,7 @@ int main()
     std::string server_ip = "127.0.0.1";
     int server_port = 6969;
 
-    std::cout << "Hello, Boost.Asio!" << std::endl;
-    io_context io_context;
+    std::cout << "Cedis, Onboard!" << std::endl;
 
     // Create a shared databasae instance
     auto db = std::make_shared<database>();
@@ -20,17 +20,11 @@ int main()
     // Create a shared command handler that uses the same database
     auto handle = std::make_shared<handleCMD>(db);
 
-    auto connection = std::make_shared<Connection>(io_context,
-        server_ip,
-        server_port,
-        handle);
+    io_context io_context;
 
-    if (!connection->start())
-    {
-        std::cerr << "Connection failed.";
-    }
+    server server_(io_context, server_port, handle);
 
-    connection->handle_client();
+    io_context.run();
 
     db->save_local_store();
 }
