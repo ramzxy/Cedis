@@ -4,7 +4,8 @@
 
 ## ✨ Features
 
-- 🔌 **Asynchronous Networking** - Built with Boost.Asio for efficient I/O operations
+- 🔌 **Asynchronous Networking** - Built with Boost.Asio for efficient non-blocking I/O operations
+- 🚀 **Multi-Client Support** - Handles multiple concurrent client connections
 - 🧠 **RESP Protocol Support** - Compatible with Redis Serialization Protocol
 - ⚙️ **Command Parser and Dispatcher** - Modular command processing with 6 implemented commands
 - 🗃️ **In-Memory Key-Value Store** - Fast data storage using STL containers
@@ -43,11 +44,27 @@ git clone https://github.com/your-username/cedis.git
 cd cedis
 
 # Configure and build
-cmake -S Cedis -B build -G "Visual Studio 16 2019"
+cmake -S . -B build -G "Visual Studio 16 2019"
 cmake --build build --config Release
 
 # Run the executable
 .\build\Release\Cedis.exe
+```
+
+#### macOS/Linux
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/cedis.git
+cd cedis
+
+# Configure and build
+mkdir build && cd build
+cmake ..
+make
+
+# Run the executable
+./Cedis
 ```
 
 #### Linux/macOS
@@ -129,18 +146,50 @@ ECHO "Hello from Cedis!"
 # Response: Hello from Cedis!
 ```
 
+### Multi-Client Testing
+
+The server now supports multiple concurrent connections. You can test this by opening multiple terminals:
+
+```bash
+# Terminal 1
+redis-cli -h 127.0.0.1 -p 6969
+SET client1 "Hello from client 1"
+
+# Terminal 2 (simultaneously)
+redis-cli -h 127.0.0.1 -p 6969
+SET client2 "Hello from client 2"
+GET client1  # Should return the value set by client 1
+```
+
+### Async Features
+
+- **Non-blocking I/O**: The server handles multiple clients without blocking
+- **Automatic Connection Management**: Connections are cleaned up automatically when clients disconnect
+- **Shared Database**: All clients share the same database instance for data consistency
+- **Event-Driven**: Uses Boost.Asio's event loop for efficient resource usage
+
 ## 🧱 Architecture Overview
 
-Cedis follows a modular architecture designed for maintainability and extensibility:
+Cedis follows a modular architecture designed for maintainability and extensibility with asynchronous networking capabilities:
 
 ### Core Components
 
-- **`Connection`** - Manages client socket connections using Boost.Asio
+- **`server`** - Async server that accepts and manages multiple client connections
+- **`Connection`** - Manages individual client socket connections using Boost.Asio async I/O
 - **`parser`** - Parses RESP (Redis Serialization Protocol) messages
 - **`command`** - Abstract base class defining the command interface
 - **`handleCMD`** - Command dispatcher that routes requests to appropriate handlers
 - **`database`** - In-memory key-value store using `std::unordered_map`
 - **Command Classes** - Individual implementations (`pingCommand`, `setCommand`, etc.)
+
+### Async Architecture
+
+The server uses Boost.Asio's asynchronous I/O model:
+
+- **Non-blocking Operations**: All network I/O is non-blocking using async callbacks
+- **Event-Driven**: Uses event loop pattern for handling multiple connections
+- **Shared State**: Database is shared across all connections for data consistency
+- **Connection Lifecycle**: Each client connection is managed independently with proper cleanup
 
 ### Design Patterns
 
@@ -148,11 +197,11 @@ Cedis follows a modular architecture designed for maintainability and extensibil
 - **Factory Pattern** - Command dispatcher creates and executes appropriate command objects
 - **RAII** - Automatic resource management with proper cleanup
 - **Modern C++** - Leverages C++17 features and STL containers
+- **Async/Await Pattern** - Uses Boost.Asio's async operations for non-blocking I/O
 
 ### Current Limitations
 
-- **Single Client** - Currently handles one client connection at a time
-- **No Persistence** - Data is stored in memory only
+- **Basic Persistence** - Simple file-based persistence (dump.rdb)
 - **Basic Error Handling** - Limited error recovery mechanisms
 - **No Authentication** - No security mechanisms implemented
 
@@ -169,12 +218,13 @@ Cedis/
 │   │   ├── existsCommand.h    # EXISTS command
 │   │   └── echoCommand.h      # ECHO command
 │   ├── command.h              # Abstract command base class
-│   ├── connection.h           # Network connection handling
+│   ├── connection.h           # Async client connection handling
+│   ├── server.h               # Async server with multi-client support
 │   ├── database.h             # Key-value store interface
 │   ├── handleCMD.h            # Command dispatcher
 │   └── parser.h               # RESP protocol parser
 ├── src/
-│   ├── connection.cpp         # Connection implementation
+│   ├── connection.cpp         # Async connection implementation
 │   ├── database.cpp           # Database operations
 │   ├── handleCMD.cpp          # Command handling logic
 │   ├── main.cpp               # Application entry point
@@ -229,9 +279,9 @@ Please use the GitHub issue tracker to report bugs or suggest features. Include:
 
 - [x] Basic RESP protocol parsing
 - [x] Essential Redis commands (PING, SET, GET, DEL, EXISTS, ECHO)
-- [x] Single client connection handling
-- [ ] Multi-client support with async I/O
-- [ ] Thread-safe database operations
+- [x] Async client connection handling
+- [x] Multi-client support with async I/O
+- [x] Thread-safe database operations
 
 ### Phase 2: Advanced Features
 
@@ -260,9 +310,10 @@ Please use the GitHub issue tracker to report bugs or suggest features. Include:
 ## 📈 Performance Characteristics
 
 - **Memory Usage**: Minimal overhead with STL containers
-- **Throughput**: Single-threaded, blocking I/O (improvements planned)
+- **Throughput**: Single-threaded, non-blocking async I/O
 - **Latency**: Low latency for in-memory operations
-- **Scalability**: Currently single-client (multi-client support planned)
+- **Scalability**: Multi-client support with async connection handling
+- **Concurrency**: Handles multiple concurrent client connections efficiently
 
 ## 🧑‍💻 Author
 
