@@ -9,7 +9,7 @@
 #include "handleCMD.h"
 #include "parser.h"
 
-class Connection
+class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
     Connection(std::shared_ptr<boost::asio::ip::tcp::socket> socket,
@@ -17,13 +17,11 @@ public:
 
     ~Connection();
 
-    bool start();
-
     void handle_client();
 
-    int send_response(const std::string* response);
+    void send_response(const std::string& response);
 
-    size_t read(std::vector<uint8_t>&);
+    void read();
 
     bool is_connected() const;
 
@@ -41,6 +39,8 @@ private:
 
     // command handler object
     std::shared_ptr<handleCMD> handler_;
+
+    std::vector<uint8_t> buffer_;
 };
 
 #endif  CONNECTION_H
