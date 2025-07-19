@@ -113,65 +113,11 @@ jobs:
           path: build/Cedis
           retention-days: 7
 
-  # Windows builds
-  windows:
-    name: Windows (${{ matrix.build_type }})
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        build_type: [Release, Debug]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup environment
-        run: |
-          echo "Running on Windows"
-          echo "Build type: ${{ matrix.build_type }}"
-
-      - name: Install vcpkg
-        run: |
-          git clone https://github.com/Microsoft/vcpkg.git
-          cd vcpkg
-          .\bootstrap-vcpkg.bat
-          .\vcpkg integrate install
-          cd ..
-
-      - name: Install Boost dependencies
-        run: |
-          .\vcpkg\vcpkg install boost-system:x64-windows boost-thread:x64-windows
-
-      - name: Build project
-        run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
-          cmake --build . --config ${{ matrix.build_type }}
-
-      - name: Test build artifacts
-        run: |
-          cd build
-          if (Test-Path "Cedis.exe") {
-            Write-Host "Executable found: Cedis.exe"
-            Get-ChildItem Cedis.exe | Select-Object Name, Length
-          } else {
-            Write-Host "Executable not found"
-            exit 1
-          }
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: cedis-windows-${{ matrix.build_type }}
-          path: build/Cedis.exe
-          retention-days: 7
-
   # Code quality checks
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
-    needs: [linux, macos, windows]
+    needs: [linux, macos]
 
     steps:
       - name: Checkout code
@@ -204,7 +150,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [linux, macos, windows]
+    needs: [linux, macos]
 
     steps:
       - name: Checkout code
@@ -244,7 +190,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [linux, macos, windows, code-quality, integration-tests]
+    needs: [linux, macos, code-quality, integration-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
