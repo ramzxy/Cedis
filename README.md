@@ -10,8 +10,10 @@
 - ⚙️ **Command Parser and Dispatcher** - Modular command processing with 6 implemented commands
 - 🗃️ **In-Memory Key-Value Store** - Fast data storage using STL containers
 - ♻️ **Modular Architecture** - Clean separation of concerns with command pattern
-- 💻 **Cross-Platform Build System** - CMake-based build configuration
+- 💻 **Cross-Platform Build System** - CMake-based build configuration with automated scripts
 - 🖥️ **Multi-Platform Support** - Windows, macOS, and Linux compatibility
+- 🔄 **Automated CI/CD** - GitHub Actions pipeline with cross-platform builds and releases
+- 🛠️ **Professional Build Scripts** - One-command setup and build process
 
 ## 🎯 Implemented Commands
 
@@ -43,82 +45,176 @@ Cedis uses a **header-only approach** for Boost.Asio, which means:
 - ✅ **Simple build process** - Clean CMakeLists.txt with minimal configuration
 - ✅ **Easy to compile anywhere** - No platform-specific Boost detection needed
 
-### Build Instructions
-
-#### Quick Start (All Platforms)
+### 🚀 Quick Start (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/ramzxy/cedis.git
 cd cedis
 
-# Install dependencies (if needed)
+# Install dependencies and build (all platforms)
 ./install_dependencies.sh
-
-# Build the project
 ./build.sh
 
 # Run the server
 ./build/Cedis
 ```
 
-#### Manual Build
+### 📦 Automated Build Scripts
 
-**Windows (Visual Studio):**
-
-```cmd
-# Clone the repository
-git clone https://github.com/ramzxy/cedis.git
-cd cedis
-
-# Configure and build
-cmake -S . -B build -G "Visual Studio 16 2019"
-cmake --build build --config Release
-
-# Run the executable
-.\build\Release\Cedis.exe
-```
-
-**macOS/Linux:**
+#### **`install_dependencies.sh`** - Dependency Management
 
 ```bash
-# Clone the repository
+# Install dependencies for your platform
+./install_dependencies.sh
+
+# Verify dependencies are installed
+./install_dependencies.sh --verify
+
+# Show help
+./install_dependencies.sh --help
+```
+
+**Features:**
+
+- ✅ **Cross-platform support** - Linux, macOS, Windows
+- ✅ **Automatic detection** - Detects your OS and package manager
+- ✅ **Minimal dependencies** - Only installs what's needed
+- ✅ **Error handling** - Comprehensive error checking and logging
+- ✅ **CI/CD ready** - Works in GitHub Actions and other CI environments
+
+#### **`build.sh`** - Build Automation
+
+```bash
+# Build in Release mode (default)
+./build.sh
+
+# Build in Debug mode
+./build.sh --debug
+
+# Build in Release mode (explicit)
+./build.sh --release
+
+# Clean build directory
+./build.sh --clean
+
+# Show help
+./build.sh --help
+```
+
+**Features:**
+
+- ✅ **Parallel builds** - Uses all available CPU cores
+- ✅ **Multiple configurations** - Release and Debug builds
+- ✅ **Project validation** - Checks for required files
+- ✅ **Artifact verification** - Ensures build was successful
+- ✅ **Professional logging** - Clear build output with timestamps
+
+### 🔧 Manual Build Instructions
+
+#### **Linux/macOS:**
+
+```bash
+# Clone and setup
 git clone https://github.com/ramzxy/cedis.git
 cd cedis
 
-# Configure and build
+# Install dependencies
+./install_dependencies.sh
+
+# Build manually
 mkdir build && cd build
 cmake ..
-make
+make -j$(nproc)
 
-# Run the executable
+# Run
 ./Cedis
 ```
 
-#### Installing Boost Dependencies
+#### **Windows (Visual Studio):**
 
-**Ubuntu/Debian:**
+```cmd
+# Clone and setup
+git clone https://github.com/ramzxy/cedis.git
+cd cedis
 
-```bash
-sudo apt update && sudo apt install libboost-all-dev cmake build-essential
+# Install dependencies (using vcpkg)
+vcpkg install boost-system boost-thread
+
+# Build manually
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+cmake --build build --config Release
+
+# Run
+.\build\Release\Cedis.exe
 ```
 
-**CentOS/RHEL/Fedora:**
+### 📋 Platform-Specific Dependencies
+
+#### **Ubuntu/Debian:**
+
+```bash
+sudo apt update && sudo apt install libboost-system-dev libboost-thread-dev cmake build-essential
+```
+
+#### **CentOS/RHEL/Fedora:**
 
 ```bash
 sudo dnf install boost-devel cmake gcc-c++
 ```
 
-**macOS (Homebrew):**
+#### **macOS (Homebrew):**
 
 ```bash
 brew install boost cmake
 ```
 
-**Windows (vcpkg):**
+#### **Windows (vcpkg):**
 
 ```cmd
 vcpkg install boost-system boost-thread
+```
+
+## 🔄 CI/CD Pipeline
+
+Cedis includes a comprehensive GitHub Actions CI/CD pipeline that provides:
+
+### **🏗️ Automated Builds**
+
+- ✅ **Linux builds** - Ubuntu with Release/Debug configurations
+- ✅ **macOS builds** - Latest macOS with Release/Debug configurations
+- ✅ **Cross-platform testing** - Ensures compatibility across platforms
+
+### **🧪 Quality Assurance**
+
+- ✅ **Static analysis** - Clang-tidy code quality checks
+- ✅ **Integration tests** - Automated server connectivity testing
+- ✅ **Build verification** - Ensures artifacts are properly created
+- ✅ **Dependency verification** - Validates all dependencies are available
+
+### **🚀 Automated Releases**
+
+- ✅ **Conditional releases** - Only creates releases with `[release]` commit messages
+- ✅ **Cross-platform artifacts** - Linux and macOS binaries included
+- ✅ **Release notes** - Automatic generation with features and installation instructions
+- ✅ **Duplicate protection** - Prevents creating duplicate releases
+
+### **📊 Pipeline Features**
+
+```yaml
+# Trigger conditions
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Jobs include:
+- Linux builds (Release/Debug)
+- macOS builds (Release/Debug)
+- Code quality checks
+- Integration tests
+- Automated releases (with [release] keyword)
 ```
 
 ## 🚀 Getting Started
@@ -126,6 +222,14 @@ vcpkg install boost-system boost-thread
 ### Starting the Server
 
 ```bash
+# Using build script (recommended)
+./build.sh
+./build/Cedis
+
+# Or manually
+mkdir build && cd build
+cmake ..
+make
 ./Cedis
 ```
 
@@ -244,18 +348,33 @@ Cedis/
 │   ├── handleCMD.cpp          # Command handling logic
 │   ├── main.cpp               # Application entry point
 │   └── parser.cpp             # RESP parsing logic
+├── scripts/
+│   ├── install_dependencies.sh # Cross-platform dependency installer
+│   └── build.sh               # Automated build script
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # CI/CD pipeline configuration
 ├── CMakeLists.txt             # Build configuration
+├── API_DOCUMENTATION.md       # Comprehensive API documentation
+├── QUICK_REFERENCE.md         # Quick command reference
 └── README.md                  # Project documentation
 ```
 
 ## 🧪 Testing
 
+### Automated Testing
+
+- ✅ **CI/CD Integration Tests** - Automated server connectivity testing
+- ✅ **Static Analysis** - Clang-tidy code quality checks
+- ✅ **Cross-platform Build Tests** - Ensures builds work on all platforms
+
+### Manual Testing
+
 Currently, testing is performed manually using TCP clients. Future plans include:
 
 - Unit tests for individual components
-- Integration tests for command processing
 - Performance benchmarks
-- Automated CI/CD pipeline
+- Extended integration test suite
 
 ## 🤝 Contributing
 
@@ -265,11 +384,12 @@ We welcome contributions! Here's how to get started:
 
 1. **Fork** the repository
 2. **Create** a feature branch: `git checkout -b feature/new-command`
-3. **Implement** your changes with proper documentation
-4. **Test** your changes thoroughly
-5. **Commit** with clear messages: `git commit -m "Add EXPIRE command support"`
-6. **Push** to your fork: `git push origin feature/new-command`
-7. **Submit** a Pull Request with a detailed description
+3. **Install dependencies**: `./install_dependencies.sh`
+4. **Implement** your changes with proper documentation
+5. **Test** your changes: `./build.sh --debug`
+6. **Commit** with clear messages: `git commit -m "Add EXPIRE command support"`
+7. **Push** to your fork: `git push origin feature/new-command`
+8. **Submit** a Pull Request with a detailed description
 
 ### Reporting Issues
 
@@ -282,13 +402,16 @@ Please use the GitHub issue tracker to report bugs or suggest features. Include:
 
 ## 📋 Development Roadmap
 
-### Phase 1: Core Functionality
+### Phase 1: Core Functionality ✅
 
 - [x] Basic RESP protocol parsing
 - [x] Essential Redis commands (PING, SET, GET, DEL, EXISTS, ECHO)
 - [x] Async client connection handling
 - [x] Multi-client support with async I/O
 - [x] Thread-safe database operations
+- [x] Cross-platform build system
+- [x] Automated CI/CD pipeline
+- [x] Professional build scripts
 
 ### Phase 2: Advanced Features
 
@@ -321,6 +444,7 @@ Please use the GitHub issue tracker to report bugs or suggest features. Include:
 - **Latency**: Low latency for in-memory operations
 - **Scalability**: Multi-client support with async connection handling
 - **Concurrency**: Handles multiple concurrent client connections efficiently
+- **Build Speed**: Optimized with parallel builds
 
 ## 🧑‍💻 Author
 
@@ -338,4 +462,4 @@ Please use the GitHub issue tracker to report bugs or suggest features. Include:
 
 ---
 
-_Built with modern C++17 and Boost.Asio_
+_Built with modern C++17, Boost.Asio, and professional CI/CD practices_
