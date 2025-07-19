@@ -40,7 +40,7 @@ Currently supported Redis-compatible commands:
 
 ```cmd
 # Clone the repository
-git clone https://github.com/your-username/cedis.git
+git clone https://github.com/ramzxy/cedis.git
 cd cedis
 
 # Configure and build
@@ -55,7 +55,7 @@ cmake --build build --config Release
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cedis.git
+git clone https://github.com/ramzxy/cedis.git
 cd cedis
 
 # Configure and build
@@ -71,7 +71,7 @@ make
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/cedis.git
+git clone https://github.com/ramzxy/cedis.git
 cd cedis
 
 # Configure and build
@@ -182,15 +182,6 @@ Cedis follows a modular architecture designed for maintainability and extensibil
 - **`database`** - In-memory key-value store using `std::unordered_map`
 - **Command Classes** - Individual implementations (`pingCommand`, `setCommand`, etc.)
 
-### Async Architecture
-
-The server uses Boost.Asio's asynchronous I/O model:
-
-- **Non-blocking Operations**: All network I/O is non-blocking using async callbacks
-- **Event-Driven**: Uses event loop pattern for handling multiple connections
-- **Shared State**: Database is shared across all connections for data consistency
-- **Connection Lifecycle**: Each client connection is managed independently with proper cleanup
-
 ### Design Patterns
 
 - **Command Pattern** - Each Redis command is encapsulated as a separate class
@@ -256,13 +247,6 @@ We welcome contributions! Here's how to get started:
 6. **Push** to your fork: `git push origin feature/new-command`
 7. **Submit** a Pull Request with a detailed description
 
-### Contribution Guidelines
-
-- Follow the existing code style and conventions
-- Add appropriate header comments for new files
-- Update documentation for new features
-- Ensure your code compiles without warnings
-- Test your changes with multiple scenarios
 
 ### Reporting Issues
 
