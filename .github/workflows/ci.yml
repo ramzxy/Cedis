@@ -49,7 +49,7 @@ jobs:
 
       - name: Build project
         run: |
-          ./build.sh --${{ lower(matrix.build_type) }}
+          ./build.sh --${{ matrix.build_type == 'Release' && 'release' || 'debug' }}
 
       - name: Test build artifacts
         run: |
@@ -97,7 +97,7 @@ jobs:
 
       - name: Build project
         run: |
-          ./build.sh --${{ lower(matrix.build_type) }}
+          ./build.sh --${{ matrix.build_type == 'Release' && 'release' || 'debug' }}
 
       - name: Test build artifacts
         run: |
