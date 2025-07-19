@@ -23,17 +23,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache dependencies
+      - name: Cache APT packages
         uses: actions/cache@v4
         with:
-          path: |
-            /usr/local
-            /opt/boost
-            ~/.cache/ccache
-            ~/.cache/apt
-          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-apt-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Setup environment
         run: |
@@ -42,8 +46,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential ccache
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential ccache
 
       - name: Make scripts executable
         run: |
@@ -83,17 +87,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache dependencies
+      - name: Cache Homebrew
         uses: actions/cache@v4
         with:
           path: |
             /usr/local
             /opt/homebrew
             ~/Library/Caches/Homebrew
-            ~/.cache/ccache
-          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          key: ${{ runner.os }}-homebrew-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-homebrew-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Setup environment
         run: |
@@ -140,22 +151,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache dependencies
+      - name: Cache APT packages
         uses: actions/cache@v4
         with:
-          path: |
-            /usr/local
-            /opt/boost
-            ~/.cache/ccache
-            ~/.cache/apt
-          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-apt-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy ccache
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy ccache
 
       - name: Make scripts executable
         run: |
@@ -185,22 +200,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache dependencies
+      - name: Cache APT packages
         uses: actions/cache@v4
         with:
-          path: |
-            /usr/local
-            /opt/boost
-            ~/.cache/ccache
-            ~/.cache/apt
-          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
+            ${{ runner.os }}-apt-
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential redis-tools ccache
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential redis-tools ccache
 
       - name: Make scripts executable
         run: |
