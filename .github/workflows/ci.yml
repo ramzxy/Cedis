@@ -1,0 +1,299 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  BOOST_VERSION: "1.84.0"
+  CMAKE_VERSION: "3.28.0"
+
+jobs:
+  # Linux builds
+  linux:
+    name: Linux (${{ matrix.distribution }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distribution: [ubuntu-22.04, ubuntu-20.04]
+        build_type: [Release, Debug]
+        include:
+          - distribution: ubuntu-22.04
+            boost_package: libboost-system-dev
+          - distribution: ubuntu-20.04
+            boost_package: libboost-system-dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          echo "Running on ${{ matrix.distribution }}"
+          echo "Build type: ${{ matrix.build_type }}"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.boost_package }} libboost-thread-dev cmake build-essential
+
+      - name: Make scripts executable
+        run: |
+          chmod +x install_dependencies.sh build.sh
+
+      - name: Verify dependencies
+        run: |
+          ./install_dependencies.sh --verify
+
+      - name: Build project
+        run: |
+          ./build.sh --${{ lower(matrix.build_type) }}
+
+      - name: Test build artifacts
+        run: |
+          cd build
+          file Cedis
+          ls -la Cedis
+          echo "Build completed successfully"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cedis-linux-${{ matrix.distribution }}-${{ matrix.build_type }}
+          path: build/Cedis
+          retention-days: 7
+
+  # macOS builds
+  macos:
+    name: macOS (${{ matrix.version }})
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        version: [14, 13, 12]
+        build_type: [Release, Debug]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          echo "Running on macOS ${{ matrix.version }}"
+          echo "Build type: ${{ matrix.build_type }}"
+
+      - name: Install dependencies
+        run: |
+          brew install boost cmake
+
+      - name: Make scripts executable
+        run: |
+          chmod +x install_dependencies.sh build.sh
+
+      - name: Verify dependencies
+        run: |
+          ./install_dependencies.sh --verify
+
+      - name: Build project
+        run: |
+          ./build.sh --${{ lower(matrix.build_type) }}
+
+      - name: Test build artifacts
+        run: |
+          cd build
+          file Cedis
+          ls -la Cedis
+          echo "Build completed successfully"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cedis-macos-${{ matrix.version }}-${{ matrix.build_type }}
+          path: build/Cedis
+          retention-days: 7
+
+  # Windows builds
+  windows:
+    name: Windows (${{ matrix.build_type }})
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        build_type: [Release, Debug]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          echo "Running on Windows"
+          echo "Build type: ${{ matrix.build_type }}"
+
+      - name: Install vcpkg
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+          .\vcpkg integrate install
+          cd ..
+
+      - name: Install Boost dependencies
+        run: |
+          .\vcpkg\vcpkg install boost-system boost-thread
+
+      - name: Build project
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
+          cmake --build . --config ${{ matrix.build_type }}
+
+      - name: Test build artifacts
+        run: |
+          cd build
+          if (Test-Path "Cedis.exe") {
+            Write-Host "Executable found: Cedis.exe"
+            Get-ChildItem Cedis.exe | Select-Object Name, Length
+          } else {
+            Write-Host "Executable not found"
+            exit 1
+          }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cedis-windows-${{ matrix.build_type }}
+          path: build/Cedis.exe
+          retention-days: 7
+
+  # Code quality checks
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: [linux, macos, windows]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy
+
+      - name: Make scripts executable
+        run: |
+          chmod +x install_dependencies.sh build.sh
+
+      - name: Run static analysis
+        run: |
+          mkdir build-analysis
+          cd build-analysis
+          cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_CLANG_TIDY=clang-tidy
+          make 2>&1 | tee clang-tidy-report.txt || true
+
+      - name: Upload analysis report
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-tidy-report
+          path: build-analysis/clang-tidy-report.txt
+          retention-days: 30
+
+  # Integration tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [linux, macos, windows]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential redis-tools
+
+      - name: Make scripts executable
+        run: |
+          chmod +x install_dependencies.sh build.sh
+
+      - name: Build project
+        run: |
+          ./build.sh --release
+
+      - name: Start server in background
+        run: |
+          cd build
+          timeout 30s ./Cedis &
+          sleep 5
+
+      - name: Test server connectivity
+        run: |
+          redis-cli -h 127.0.0.1 -p 6969 PING
+          redis-cli -h 127.0.0.1 -p 6969 SET test "hello"
+          redis-cli -h 127.0.0.1 -p 6969 GET test
+          redis-cli -h 127.0.0.1 -p 6969 DEL test
+
+      - name: Cleanup
+        run: |
+          pkill -f Cedis || true
+
+  # Release workflow
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [linux, macos, windows, code-quality, integration-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(grep 'project(Cedis VERSION' CMakeLists.txt | sed 's/.*VERSION \([0-9.]*\).*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          release_name: Cedis v${{ steps.get_version.outputs.version }}
+          body: |
+            ## 🚀 Cedis v${{ steps.get_version.outputs.version }}
+
+            ### ✨ Features
+            - Asynchronous networking with Boost.Asio
+            - Multi-client support
+            - Redis-compatible protocol
+            - Cross-platform compatibility
+
+            ### 📦 Downloads
+            - Linux: Download from artifacts
+            - macOS: Download from artifacts  
+            - Windows: Download from artifacts
+
+            ### 🔧 Installation
+            ```bash
+            git clone https://github.com/ramzxy/cedis.git
+            cd cedis
+            ./install_dependencies.sh
+            ./build.sh
+            ```
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/Cedis
+          asset_name: cedis-linux-x64
+          asset_content_type: application/octet-stream

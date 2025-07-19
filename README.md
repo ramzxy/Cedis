@@ -31,12 +31,40 @@ Currently supported Redis-compatible commands:
 ### Prerequisites
 
 - **C++17 Compiler** - GCC 7+, Clang 5+, or MSVC 2017+
-- **[Boost Libraries](https://www.boost.org/)** - Version 1.70+ (asio, system, thread components)
+- **[Boost Libraries](https://www.boost.org/)** - Version 1.70+ (system and thread components only)
 - **[CMake](https://cmake.org/)** - Version 3.20 or higher
+
+### Why This Approach?
+
+Cedis uses a **header-only approach** for Boost.Asio, which means:
+
+- ✅ **No complex dependency management** - Just install Boost system and thread libraries
+- ✅ **Cross-platform compatibility** - Works on any platform with Boost installed
+- ✅ **Simple build process** - Clean CMakeLists.txt with minimal configuration
+- ✅ **Easy to compile anywhere** - No platform-specific Boost detection needed
 
 ### Build Instructions
 
-#### Windows (Visual Studio)
+#### Quick Start (All Platforms)
+
+```bash
+# Clone the repository
+git clone https://github.com/ramzxy/cedis.git
+cd cedis
+
+# Install dependencies (if needed)
+./install_dependencies.sh
+
+# Build the project
+./build.sh
+
+# Run the server
+./build/Cedis
+```
+
+#### Manual Build
+
+**Windows (Visual Studio):**
 
 ```cmd
 # Clone the repository
@@ -51,7 +79,7 @@ cmake --build build --config Release
 .\build\Release\Cedis.exe
 ```
 
-#### macOS/Linux
+**macOS/Linux:**
 
 ```bash
 # Clone the repository
@@ -67,34 +95,30 @@ make
 ./Cedis
 ```
 
-#### Linux/macOS
+#### Installing Boost Dependencies
+
+**Ubuntu/Debian:**
 
 ```bash
-# Clone the repository
-git clone https://github.com/ramzxy/cedis.git
-cd cedis
-
-# Configure and build
-cmake -S Cedis -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-
-# Run the executable
-./build/Cedis
+sudo apt update && sudo apt install libboost-all-dev cmake build-essential
 ```
 
-#### Using vcpkg (Recommended)
+**CentOS/RHEL/Fedora:**
 
 ```bash
-# Install dependencies
-vcpkg install boost-asio boost-system boost-thread
+sudo dnf install boost-devel cmake gcc-c++
+```
 
-# Configure with vcpkg toolchain
-cmake -S Cedis -B build \
-  -DCMAKE_TOOLCHAIN_FILE=[vcpkg-root]/scripts/buildsystems/vcpkg.cmake \
-  -DCMAKE_BUILD_TYPE=Release
+**macOS (Homebrew):**
 
-# Build
-cmake --build build
+```bash
+brew install boost cmake
+```
+
+**Windows (vcpkg):**
+
+```cmd
+vcpkg install boost-system boost-thread
 ```
 
 ## 🚀 Getting Started
@@ -246,7 +270,6 @@ We welcome contributions! Here's how to get started:
 5. **Commit** with clear messages: `git commit -m "Add EXPIRE command support"`
 6. **Push** to your fork: `git push origin feature/new-command`
 7. **Submit** a Pull Request with a detailed description
-
 
 ### Reporting Issues
 
