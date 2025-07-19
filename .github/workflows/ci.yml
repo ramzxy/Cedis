@@ -140,7 +140,7 @@ jobs:
 
       - name: Install Boost dependencies
         run: |
-          .\vcpkg\vcpkg install boost-system boost-thread
+          .\vcpkg\vcpkg install boost-system:x64-windows boost-thread:x64-windows
 
       - name: Build project
         run: |

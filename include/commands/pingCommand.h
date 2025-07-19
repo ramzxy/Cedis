@@ -13,4 +13,4 @@ public:
     }
 };
 
-#endif PING_H
+#endif // PING_H

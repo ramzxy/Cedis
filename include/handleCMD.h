@@ -26,4 +26,4 @@ public:
 private:
     std::unordered_map<std::string, std::unique_ptr<command>> command_;
 };
-#endif HANDLECMD_H
+#endif // HANDLECMD_H

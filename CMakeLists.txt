@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Set CMake policies
+if(POLICY CMP0167)
+    cmake_policy(SET CMP0167 NEW)
+endif()
+
 # Boost configuration - support multiple installation methods
 if(DEFINED BOOST_ROOT)
     message(STATUS "Using BOOST_ROOT: ${BOOST_ROOT}")

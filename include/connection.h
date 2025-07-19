@@ -43,4 +43,4 @@ private:
     std::vector<uint8_t> buffer_;
 };
 
-#endif  CONNECTION_H
+#endif // CONNECTION_H

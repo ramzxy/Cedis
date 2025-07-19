@@ -24,4 +24,4 @@ private:
     std::vector<std::string> arrayParse(size_t&);
 };
 
-#endif PARSER_H
+#endif // PARSER_H
