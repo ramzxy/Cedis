@@ -247,6 +247,8 @@ jobs:
 
       - name: Check if release exists
         id: check_release
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view v${{ steps.get_version.outputs.version }} 2>/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -258,6 +260,8 @@ jobs:
 
       - name: Create Release
         if: steps.check_release.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release create v${{ steps.get_version.outputs.version }} \
             --title "Cedis v${{ steps.get_version.outputs.version }}" \
@@ -300,6 +304,8 @@ jobs:
 
       - name: Upload Linux Release Asset
         if: steps.check_release.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload v${{ steps.get_version.outputs.version }} \
             ./artifacts/linux/Cedis \
@@ -307,6 +313,8 @@ jobs:
 
       - name: Upload macOS Release Asset
         if: steps.check_release.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload v${{ steps.get_version.outputs.version }} \
             ./artifacts/macos/Cedis \
