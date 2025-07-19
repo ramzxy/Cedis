@@ -13,31 +13,37 @@ env:
 jobs:
   # Linux builds
   linux:
-    name: Linux (${{ matrix.distribution }})
+    name: Linux (${{ matrix.build_type }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        distribution: [ubuntu-22.04, ubuntu-20.04]
         build_type: [Release, Debug]
-        include:
-          - distribution: ubuntu-22.04
-            boost_package: libboost-system-dev
-          - distribution: ubuntu-20.04
-            boost_package: libboost-system-dev
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local
+            /opt/boost
+            ~/.cache/ccache
+            ~/.cache/apt
+          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
       - name: Setup environment
         run: |
-          echo "Running on ${{ matrix.distribution }}"
+          echo "Running on Ubuntu 22.04"
           echo "Build type: ${{ matrix.build_type }}"
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ${{ matrix.boost_package }} libboost-thread-dev cmake build-essential
+          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential ccache
 
       - name: Make scripts executable
         run: |
@@ -61,31 +67,42 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cedis-linux-${{ matrix.distribution }}-${{ matrix.build_type }}
+          name: cedis-linux-${{ matrix.build_type }}
           path: build/Cedis
           retention-days: 7
 
   # macOS builds
   macos:
-    name: macOS (${{ matrix.version }})
+    name: macOS (${{ matrix.build_type }})
     runs-on: macos-latest
     strategy:
       matrix:
-        version: [14, 13, 12]
         build_type: [Release, Debug]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local
+            /opt/homebrew
+            ~/Library/Caches/Homebrew
+            ~/.cache/ccache
+          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
       - name: Setup environment
         run: |
-          echo "Running on macOS ${{ matrix.version }}"
+          echo "Running on macOS 14"
           echo "Build type: ${{ matrix.build_type }}"
 
       - name: Install dependencies
         run: |
-          brew install boost cmake
+          brew install boost cmake ccache
 
       - name: Make scripts executable
         run: |
@@ -109,7 +126,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cedis-macos-${{ matrix.version }}-${{ matrix.build_type }}
+          name: cedis-macos-${{ matrix.build_type }}
           path: build/Cedis
           retention-days: 7
 
@@ -123,10 +140,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local
+            /opt/boost
+            ~/.cache/ccache
+            ~/.cache/apt
+          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy
+          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy ccache
 
       - name: Make scripts executable
         run: |
@@ -156,10 +185,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local
+            /opt/boost
+            ~/.cache/ccache
+            ~/.cache/apt
+          key: ${{ runner.os }}-deps-${{ hashFiles('install_dependencies.sh') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential redis-tools
+          sudo apt-get install -y libboost-system-dev libboost-thread-dev cmake build-essential redis-tools ccache
 
       - name: Make scripts executable
         run: |
@@ -192,54 +233,86 @@ jobs:
     runs-on: ubuntu-latest
     needs: [linux, macos, code-quality, integration-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get version
         id: get_version
         run: |
           VERSION=$(grep 'project(Cedis VERSION' CMakeLists.txt | sed 's/.*VERSION \([0-9.]*\).*/\1/')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view v${{ steps.get_version.outputs.version }} 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release v${{ steps.get_version.outputs.version }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release v${{ steps.get_version.outputs.version }} does not exist"
+          fi
 
       - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.check_release.outputs.exists != 'true'
+        run: |
+          gh release create v${{ steps.get_version.outputs.version }} \
+            --title "Cedis v${{ steps.get_version.outputs.version }}" \
+            --notes "## 🚀 Cedis v${{ steps.get_version.outputs.version }}
+
+          ### ✨ Features
+          - Asynchronous networking with Boost.Asio
+          - Multi-client support
+          - Redis-compatible protocol
+          - Cross-platform compatibility
+
+          ### 📦 Downloads
+          - Linux: Download from artifacts
+          - macOS: Download from artifacts  
+          - Windows: Download from artifacts
+
+          ### 🔧 Installation
+          \`\`\`bash
+          git clone https://github.com/ramzxy/cedis.git
+          cd cedis
+          ./install_dependencies.sh
+          ./build.sh
+          \`\`\`" \
+            --draft=false \
+            --prerelease=false
+
+      - name: Download Linux artifacts
+        if: steps.check_release.outputs.exists != 'true'
+        uses: actions/download-artifact@v4
         with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          release_name: Cedis v${{ steps.get_version.outputs.version }}
-          body: |
-            ## 🚀 Cedis v${{ steps.get_version.outputs.version }}
+          name: cedis-linux-Release
+          path: ./artifacts/linux
 
-            ### ✨ Features
-            - Asynchronous networking with Boost.Asio
-            - Multi-client support
-            - Redis-compatible protocol
-            - Cross-platform compatibility
-
-            ### 📦 Downloads
-            - Linux: Download from artifacts
-            - macOS: Download from artifacts  
-            - Windows: Download from artifacts
-
-            ### 🔧 Installation
-            ```bash
-            git clone https://github.com/ramzxy/cedis.git
-            cd cedis
-            ./install_dependencies.sh
-            ./build.sh
-            ```
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download macOS artifacts
+        if: steps.check_release.outputs.exists != 'true'
+        uses: actions/download-artifact@v4
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/Cedis
-          asset_name: cedis-linux-x64
-          asset_content_type: application/octet-stream
+          name: cedis-macos-Release
+          path: ./artifacts/macos
+
+      - name: Upload Linux Release Asset
+        if: steps.check_release.outputs.exists != 'true'
+        run: |
+          gh release upload v${{ steps.get_version.outputs.version }} \
+            ./artifacts/linux/Cedis \
+            --clobber
+
+      - name: Upload macOS Release Asset
+        if: steps.check_release.outputs.exists != 'true'
+        run: |
+          gh release upload v${{ steps.get_version.outputs.version }} \
+            ./artifacts/macos/Cedis \
+            --clobber
