@@ -23,14 +23,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
       - name: Setup environment
         run: |
           echo "Running on Ubuntu 22.04"
@@ -39,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential ccache
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential
 
       - name: Make scripts executable
         run: |
@@ -79,25 +71,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Homebrew
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local
-            /opt/homebrew
-            ~/Library/Caches/Homebrew
-          key: ${{ runner.os }}-homebrew-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-homebrew-
-
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
       - name: Setup environment
         run: |
           echo "Running on macOS 14"
@@ -105,7 +78,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install boost cmake ccache
+          brew install boost cmake
 
       - name: Make scripts executable
         run: |
@@ -143,18 +116,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy ccache
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential clang-tidy
 
       - name: Make scripts executable
         run: |
@@ -184,18 +149,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache ccache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/*.cpp', '**/*.h') }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-
-
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential redis-tools ccache
+          sudo apt-get install -y --no-install-recommends libboost-system-dev libboost-thread-dev cmake build-essential redis-tools
 
       - name: Make scripts executable
         run: |
