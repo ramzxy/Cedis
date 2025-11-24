@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
-project(Cedis VERSION 1.0.0 LANGUAGES CXX)
+project(Cedis 
+    VERSION 1.0.0 
+    DESCRIPTION "High-performance in-memory key-value store inspired by Redis, built with modern C++17 and Boost.Asio"
+    LANGUAGES CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
